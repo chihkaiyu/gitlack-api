@@ -1,3 +1,5 @@
+[![pipeline status](https://gitlab.com/chihkaiyu/gitlack/badges/master/pipeline.svg)](https://gitlab.com/chihkaiyu/gitlack/commits/master)
+[![coverage report](https://gitlab.com/chihkaiyu/gitlack/badges/master/coverage.svg)](https://gitlab.com/chihkaiyu/gitlack/commits/master)
 # Gitlack
 :palm_tree: Gitlack will post the message on Slack and tag related people.  
 
