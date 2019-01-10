@@ -1,0 +1,21 @@
+stages:
+  - test
+
+unittest:
+  stage: test
+  image: golang:1.11.3-stretch
+  only:
+    - branches
+  cache:
+    paths:
+      - .cache
+  variables:
+    GO111MODULE: "on"
+  script:
+    - mkdir -p .cache
+    - export GOPATH="$CI_PROJECT_DIR/.cache"
+    - go vet ./...
+    # don't check mocks folder
+    - go test -coverprofile=coverage.out $(go list ./... | grep -v /mocks)
+    - go tool cover -func=coverage.out
+  coverage: '/total:\s+\(statements\)\s+(\d+.\d+\%)/'
