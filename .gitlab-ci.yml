@@ -1,5 +1,6 @@
 stages:
   - test
+  - release
 
 unittest:
   stage: test
@@ -19,3 +20,19 @@ unittest:
     - go test -coverprofile=coverage.out $(go list ./... | grep -v /mocks)
     - go tool cover -func=coverage.out
   coverage: '/total:\s+\(statements\)\s+(\d+.\d+\%)/'
+
+release-image:
+  stage: release
+  image: docker:18.03.1-ce
+  only:
+    - tags
+  services:
+    - docker:18.03.1-ce-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_DRIVER: overlay2
+  script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker build -t chihkaiyu/gitlack:$CI_COMMIT_REF_NAME .
+    - docker push chihkaiyu/gitlack:$CI_COMMIT_REF_NAME
+    - docker logout
