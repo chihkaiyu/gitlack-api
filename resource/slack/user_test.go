@@ -128,7 +128,6 @@ func TestGetUserOnePage(t *testing.T) {
 	expected := []map[string]string{
 		map[string]string{
 			"ID":    "fake-id-2",
-			"Name":  "fake-name-2",
 			"Email": "fake-2@fake.com",
 		},
 	}
@@ -138,7 +137,6 @@ func TestGetUserOnePage(t *testing.T) {
 
 	for i, e := range expected {
 		assert.Equal(users[i].ID, e["ID"], "id are different")
-		assert.Equal(users[i].Name, e["Name"], "name are different")
 		assert.Equal(users[i].Email, e["Email"], "email are different")
 	}
 
@@ -181,17 +179,14 @@ func TestGetUserMultiplePages(t *testing.T) {
 	expected := []map[string]string{
 		map[string]string{
 			"ID":    "slackbot-id",
-			"Name":  "slackbot",
 			"Email": "",
 		},
 		map[string]string{
 			"ID":    "fake-id",
-			"Name":  "fake-name",
 			"Email": "fake@fake.com",
 		},
 		map[string]string{
 			"ID":    "fake-id-2",
-			"Name":  "fake-name-2",
 			"Email": "fake-2@fake.com",
 		},
 	}
@@ -201,7 +196,6 @@ func TestGetUserMultiplePages(t *testing.T) {
 
 	for i, e := range expected {
 		assert.Equal(users[i].ID, e["ID"], "id are different")
-		assert.Equal(users[i].Name, e["Name"], "name are different")
 		assert.Equal(users[i].Email, e["Email"], "email are different")
 	}
 
