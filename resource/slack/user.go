@@ -23,7 +23,6 @@ type Profile struct {
 // Member is the field represents the information about Slack user
 type Member struct {
 	ID      string  `json:"id"`
-	Name    string  `json:"name"`
 	IsBot   bool    `json:"is_bot"`
 	Deleted bool    `json:"deleted"`
 	Profile Profile `json:"profile"`
@@ -37,7 +36,6 @@ type SlackUserResponse struct {
 
 type SlackUser struct {
 	ID    string
-	Name  string
 	Email string
 }
 
@@ -79,7 +77,6 @@ func (s *slack) GetUser() ([]*SlackUser, error) {
 			}
 			slackUser := &SlackUser{
 				ID:    u.ID,
-				Name:  u.Name,
 				Email: u.Profile.Email,
 			}
 			allUsers = append(allUsers, slackUser)

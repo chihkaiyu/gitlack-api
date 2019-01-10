@@ -30,15 +30,15 @@ func TestSyncUser(t *testing.T) {
 		fakeEmail := fmt.Sprintf("fake-email-%d@fake.com", i)
 		fakeName := fmt.Sprintf("fake-name-%d", i)
 		fakeSlackID := fmt.Sprintf("fake-slack-id-%d", i)
-		g := &gitlab.GitLabUser{ID: i, Email: fakeEmail}
+		g := &gitlab.GitLabUser{ID: i, Email: fakeEmail, Name: fakeName}
 		mockedGitLabUser = append(mockedGitLabUser, g)
-		s := &slack.SlackUser{ID: fakeSlackID, Email: fakeEmail, Name: fakeName}
+		s := &slack.SlackUser{ID: fakeSlackID, Email: fakeEmail}
 		mockedSlackUser = append(mockedSlackUser, s)
 		u := &model.User{
 			Email:    strings.Split(fakeEmail, "@")[0],
 			SlackID:  s.ID,
 			GitLabID: g.ID,
-			Name:     s.Name,
+			Name:     g.Name,
 		}
 		mockedUser = append(mockedUser, u)
 	}
@@ -71,37 +71,39 @@ func TestDropSomeUser(t *testing.T) {
 	var mockedGitLabUser []*gitlab.GitLabUser
 	for i := 0; i < 7; i++ {
 		fakeEmail := fmt.Sprintf("fake-email-%d@fake.com", i)
-		g := &gitlab.GitLabUser{ID: i, Email: fakeEmail}
+		fakeName := fmt.Sprintf("fake-name-%d", i)
+		g := &gitlab.GitLabUser{ID: i, Email: fakeEmail, Name: fakeName}
 		mockedGitLabUser = append(mockedGitLabUser, g)
 	}
 
 	var mockedSlackUser []*slack.SlackUser
 	for i := 3; i < 10; i++ {
 		fakeEmail := fmt.Sprintf("fake-email-%d@fake.com", i)
-		fakeName := fmt.Sprintf("fake-name-%d", i)
 		fakeSlackID := fmt.Sprintf("fake-slack-id-%d", i)
-		s := &slack.SlackUser{ID: fakeSlackID, Email: fakeEmail, Name: fakeName}
+		s := &slack.SlackUser{ID: fakeSlackID, Email: fakeEmail}
 		mockedSlackUser = append(mockedSlackUser, s)
 	}
 
 	var mockedUser []*model.User
 	for i := 0; i < 3; i++ {
 		fakeEmail := fmt.Sprintf("fake-email-%d@fake.com", i)
+		fakeName := fmt.Sprintf("fake-name-%d", i)
 		u := &model.User{
 			Email:    strings.Split(fakeEmail, "@")[0],
 			GitLabID: i,
+			Name: fakeName,
 		}
 		mockedUser = append(mockedUser, u)
 	}
 	for i := 3; i < 7; i++ {
 		fakeEmail := fmt.Sprintf("fake-email-%d@fake.com", i)
-		fakeName := fmt.Sprintf("fake-name-%d", i)
 		fakeSlackID := fmt.Sprintf("fake-slack-id-%d", i)
+		fakeName := fmt.Sprintf("fake-name-%d", i)
 		u := &model.User{
 			Email:    strings.Split(fakeEmail, "@")[0],
 			SlackID:  fakeSlackID,
 			GitLabID: i,
-			Name:     fakeName,
+			Name: fakeName,
 		}
 		mockedUser = append(mockedUser, u)
 	}
@@ -175,15 +177,15 @@ func TestCreateUserFail(t *testing.T) {
 		fakeEmail := fmt.Sprintf("fake-email-%d@fake.com", i)
 		fakeName := fmt.Sprintf("fake-name-%d", i)
 		fakeSlackID := fmt.Sprintf("fake-slack-id-%d", i)
-		g := &gitlab.GitLabUser{ID: i, Email: fakeEmail}
+		g := &gitlab.GitLabUser{ID: i, Email: fakeEmail, Name: fakeName}
 		mockedGitLabUser = append(mockedGitLabUser, g)
-		s := &slack.SlackUser{ID: fakeSlackID, Email: fakeEmail, Name: fakeName}
+		s := &slack.SlackUser{ID: fakeSlackID, Email: fakeEmail}
 		mockedSlackUser = append(mockedSlackUser, s)
 		u := &model.User{
 			Email:    strings.Split(fakeEmail, "@")[0],
 			SlackID:  s.ID,
 			GitLabID: g.ID,
-			Name:     s.Name,
+			Name:     g.Name,
 		}
 		mockedUser = append(mockedUser, u)
 	}
