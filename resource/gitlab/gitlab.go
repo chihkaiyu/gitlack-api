@@ -12,6 +12,7 @@ type GitLab interface {
 	GetProject() ([]*model.Project, error)
 	GetUser() ([]*GitLabUser, error)
 	GetTagList(int) ([]*Tag, error)
+	GetSingleCommit(int, string) (*Commit, error)
 }
 
 type gitlab struct {
