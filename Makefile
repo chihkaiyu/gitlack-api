@@ -1,6 +1,6 @@
 IMAGE_NAME := gitlack
 CONTAINER_NAME := gitlack
-VERSION := v0.0.1
+VERSION := v0.0.2
 
 
 .PHONY: build

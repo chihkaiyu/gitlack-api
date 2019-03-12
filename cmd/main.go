@@ -72,7 +72,7 @@ var flags = []cli.Flag{
 func main() {
 	app := cli.NewApp()
 	app.Name = "gitlack"
-	app.Version = "v0.0.1"
+	app.Version = "v0.0.2"
 	app.Usage = "gitlack"
 	app.Action = start
 	app.Flags = flags
