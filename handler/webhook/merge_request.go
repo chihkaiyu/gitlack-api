@@ -3,9 +3,11 @@ package webhook
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"regexp"
 	"strings"
 	"text/template"
+	"time"
 
 	"gitlack/model"
 
@@ -31,6 +33,8 @@ func (h *hook) MergeRequestEvent(b []byte) {
 
 	if mr.ObjAttr.Action == "open" || mr.ObjAttr.Action == "reopen" {
 		activeMR(mr, h)
+	} else if mr.ObjAttr.Action == "update" {
+		go trackPipelineStatus(mr, h)
 	} else if mr.ObjAttr.Action == "merge" || mr.ObjAttr.Action == "close" {
 		deactiveMR(mr, h)
 	} else {
@@ -141,6 +145,11 @@ func activeMR(mr MergeRequestEvent, h *hook) {
 	if err != nil {
 		return
 	}
+
+	// track pipeline status after
+	// sent Slack message and created MR record
+	go trackPipelineStatus(mr, h)
+
 }
 
 func deactiveMR(mr MergeRequestEvent, h *hook) {
@@ -156,4 +165,32 @@ func deactiveMR(mr MergeRequestEvent, h *hook) {
 	}
 
 	h.s.PostSlackMessage(mrThread.Channel, slackText, nil, mrThread.ThreadTS)
+}
+
+// for easy writing test
+var sleep = time.Sleep
+
+func trackPipelineStatus(mr MergeRequestEvent, h *hook) {
+	// check every 30 seconds and timeout after an hour
+	for i := 0; i < 120; i++ {
+		commit, err := h.g.GetSingleCommit(mr.ProjectInfo.ID, mr.ObjAttr.LastCommit.ID)
+		if err != nil {
+			return
+		}
+
+		if commit.LastPipeline.Status == "failed" {
+			mrThread, err := h.db.GetMergeRequest(mr.ProjectInfo.ID, mr.ObjAttr.ObjectNum)
+			if err != nil {
+				return
+			}
+			slackText := fmt.Sprintf("Pipeline <%v|#%v> failed!", commit.LastPipeline.WebURL, commit.LastPipeline.ID)
+			h.s.PostSlackMessage(mrThread.Channel, slackText, nil, mrThread.ThreadTS)
+			return
+		} else if commit.LastPipeline.Status == "success" {
+			return
+		}
+
+		// wait 30 seconds for next checking
+		sleep(time.Second * 30)
+	}
 }
