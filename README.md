@@ -25,10 +25,10 @@ See [Building Slack apps](https://api.slack.com/slack-apps) for more information
 
 ## Setup Gitlack
 ```
-docker pull chihkaiyu/gitlack:v0.0.1
+docker pull chihkaiyu/gitlack:v0.0.2
 docker run -d --name ${CONTAINER_NAME} \
     -p 5000:5000 \
-    chihkaiyu/gitlack:v0.0.1 \
+    chihkaiyu/gitlack:v0.0.2 \
     --slack-token YOUR-SLACK-TOKEN \
     --gitlab-token YOUR-GITLAB-TOKEN
 ```
@@ -73,10 +73,10 @@ go build -o main ./cmd
 Gitlack has been dockerized and release to [Docker Hub](https://cloud.docker.com/repository/docker/chihkaiyu/gitlack).  
 Simply run:  
 ```
-docker pull chihkaiyu/gitlack:v0.0.1
+docker pull chihkaiyu/gitlack:v0.0.2
 docker run -d --name ${CONTAINER_NAME} \
     -p 5000:5000 \
-    chihkaiyu/gitlack:v0.0.1 \
+    chihkaiyu/gitlack:v0.0.2 \
     --slack-token YOUR-SLACK-TOKEN \
     --gitlab-token YOUR-GITLAB-TOKEN
 ```
@@ -110,7 +110,7 @@ For example,
 docker run -d --name ${CONTAINER_NAME} \
     -p 5000:5000 \
     -v /path/to/your/gitlab.db:/home/gitlack/db/gitlack.db \
-    gitlack:v0.0.1 \
+    gitlack:v0.0.2 \
     --slack-token YOUR-SLACK-TOKEN \
     --gitlab-token YOUR-GITLAB-TOKEN
 ```

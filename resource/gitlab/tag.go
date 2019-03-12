@@ -27,7 +27,14 @@ type Release struct {
 }
 
 type Commit struct {
-	CommitterEmail string `json:"committer_email"`
+	CommitterEmail string   `json:"committer_email"`
+	LastPipeline   Pipeline `json:"last_pipeline"`
+}
+
+type Pipeline struct {
+	ID     int    `json:"id"`
+	Status string `json:"status"`
+	WebURL string `json:"web_url"`
 }
 
 type Compare struct {

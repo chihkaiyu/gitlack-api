@@ -20,6 +20,12 @@ type ObjectAttributes struct {
 	ObjectNum    int    `json:"iid"`
 	Note         string `json:"note"`
 	NoteableType string `json:"noteable_type"`
+	LastCommit   Commit `json:"last_commit"`
+}
+
+// Commit represents the data strcuture of `last_commit` in GitLab merge request webhook
+type Commit struct {
+	ID string `json:"id"`
 }
 
 // Issue represents the data structure of issue in comment events

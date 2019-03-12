@@ -34,6 +34,29 @@ func (_m *GitLab) GetProject() ([]*model.Project, error) {
 	return r0, r1
 }
 
+// GetSingleCommit provides a mock function with given fields: _a0, _a1
+func (_m *GitLab) GetSingleCommit(_a0 int, _a1 string) (*gitlab.Commit, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 *gitlab.Commit
+	if rf, ok := ret.Get(0).(func(int, string) *gitlab.Commit); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gitlab.Commit)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int, string) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetTagList provides a mock function with given fields: _a0
 func (_m *GitLab) GetTagList(_a0 int) ([]*gitlab.Tag, error) {
 	ret := _m.Called(_a0)
