@@ -140,6 +140,16 @@ func (ds *datastore) UpdateProjectDefaultChannel(name, channel string) error {
 	return nil
 }
 
+func (ds *datastore) UpdateGroupDefaultChannel(name, channel string) error {
+	_, err := ds.Exec("UPDATE Project SET default_channel=? WHERE name like ?", channel, name+"%")
+	if err != nil {
+		logrus.Debugf("UpdateGroupDefaultChannel fail, name: %v, channel: %v", name, channel)
+		logrus.Errorln(err)
+		return err
+	}
+	return nil
+}
+
 func (ds *datastore) CreateUser(u *model.User) error {
 	sql := `
 INSERT INTO User (gitlab_id, email, slack_id, name)
