@@ -38,6 +38,11 @@ func (s *server) setupRouter() {
 		user.POST("", s.router.WrapSyncUser)
 	}
 
+	group := s.engine.Group("/api/group")
+	{
+		group.PUT("/:namespace/*path", s.router.UpdateGroup)
+	}
+
 	project := s.engine.Group("/api/project")
 	{
 		project.GET("/:namespace/*path", s.router.GetProject)
