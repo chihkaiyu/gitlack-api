@@ -15,6 +15,7 @@ type Store interface {
 
 	UpdateUserDefaultChannel(string, string) error
 	UpdateProjectDefaultChannel(string, string) error
+	UpdateGroupDefaultChannel(string, string) error
 
 	CreateUser(*model.User) error
 	CreateProject(*model.Project) error
