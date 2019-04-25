@@ -37,11 +37,11 @@ func TestGetSingleCommit(t *testing.T) {
 		Body:       ioutil.NopCloser(bytes.NewReader(singleCommitResponse)),
 	}
 
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeGitLabAPI+fmt.Sprintf("/projects/%v/repository/commits/%v", fakeID, fakeSha), mapNil, params, mapNil).Return(mockedRes, nil)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeGitLabAPI+fmt.Sprintf("/projects/%v/repository/commits/%v", fakeID, fakeSha), mapNil, params, mapNil).Return(mockedRes, nil)
 
 	g := &gitlab{
-		tool:         mockedUtil,
+		client:       mockedClient,
 		GitLabDomain: fakeGitLabDomain,
 		GitLabAPI:    fakeGitLabAPI,
 		GitLabToken:  fakeGitLabToken,
@@ -50,6 +50,6 @@ func TestGetSingleCommit(t *testing.T) {
 	_, err := g.GetSingleCommit(fakeID, fakeSha)
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Get", 1)
 	assert.Nil(err)
 }

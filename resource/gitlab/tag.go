@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 
 	"github.com/sirupsen/logrus"
 )
@@ -46,7 +45,7 @@ func (g *gitlab) GetTagList(id int) ([]*Tag, error) {
 	params := map[string]string{
 		"private_token": g.GitLabToken,
 	}
-	res, err := g.tool.Request(http.MethodGet, url, nil, params, nil)
+	res, err := g.client.Get(url, nil, params, nil)
 	if err != nil {
 		return nil, err
 	}

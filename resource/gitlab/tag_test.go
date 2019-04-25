@@ -59,11 +59,11 @@ func TestGetTagList(t *testing.T) {
 		Body:       ioutil.NopCloser(bytes.NewReader(listTagResponse)),
 	}
 
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeGitLabAPI+fmt.Sprintf("/projects/%v/repository/tags", fakeID), mapNil, params, mapNil).Return(mockedRes, nil)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeGitLabAPI+fmt.Sprintf("/projects/%v/repository/tags", fakeID), mapNil, params, mapNil).Return(mockedRes, nil)
 
 	g := &gitlab{
-		tool:         mockedUtil,
+		client:       mockedClient,
 		GitLabDomain: fakeGitLabDomain,
 		GitLabAPI:    fakeGitLabAPI,
 		GitLabToken:  fakeGitLabToken,
@@ -98,7 +98,7 @@ func TestGetTagList(t *testing.T) {
 	}
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Get", 1)
 	assert.Equal(3, len(tags), "number of tag should be equal")
 
 	for i, e := range expectedCommit {
@@ -123,11 +123,11 @@ func TestGetTagListRequestFail(t *testing.T) {
 	}
 	mockedErr := errors.New("fake-error")
 
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeGitLabAPI+fmt.Sprintf("/projects/%v/repository/tags", fakeID), mapNil, params, mapNil).Return(nil, mockedErr)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeGitLabAPI+fmt.Sprintf("/projects/%v/repository/tags", fakeID), mapNil, params, mapNil).Return(nil, mockedErr)
 
 	g := &gitlab{
-		tool:         mockedUtil,
+		client:       mockedClient,
 		GitLabDomain: fakeGitLabDomain,
 		GitLabAPI:    fakeGitLabAPI,
 		GitLabToken:  fakeGitLabToken,
@@ -136,7 +136,7 @@ func TestGetTagListRequestFail(t *testing.T) {
 	tags, err := g.GetTagList(fakeID)
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Get", 1)
 	assert.Equal(err.Error(), "fake-error", "error messages should be equal")
 	assert.Nil(tags)
 }
@@ -156,11 +156,11 @@ func TestGetTagListGitLabError(t *testing.T) {
 		Header:     map[string][]string{"X-Next-Page": []string{""}},
 	}
 
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeGitLabAPI+fmt.Sprintf("/projects/%v/repository/tags", fakeID), mapNil, params, mapNil).Return(mockedRes, nil)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeGitLabAPI+fmt.Sprintf("/projects/%v/repository/tags", fakeID), mapNil, params, mapNil).Return(mockedRes, nil)
 
 	g := &gitlab{
-		tool:         mockedUtil,
+		client:       mockedClient,
 		GitLabDomain: fakeGitLabDomain,
 		GitLabAPI:    fakeGitLabAPI,
 		GitLabToken:  fakeGitLabToken,
@@ -169,7 +169,7 @@ func TestGetTagListGitLabError(t *testing.T) {
 	tags, err := g.GetTagList(fakeID)
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Get", 1)
 	assert.Equal(err.Error(), "GitLab error: fake-gitlab-error", "error messages should be equal")
 	assert.Nil(tags)
 }

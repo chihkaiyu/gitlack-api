@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 
 	"github.com/sirupsen/logrus"
 )
@@ -48,7 +47,7 @@ func (s *slack) GetUser() ([]*SlackUser, error) {
 	var allUsers []*SlackUser
 	// run at most 100 times for preventing from infinite loop
 	for i := 0; i < 100; i++ {
-		res, err := s.tool.Request(http.MethodGet, url, nil, params, nil)
+		res, err := s.client.Get(url, nil, params, nil)
 		if err != nil {
 			return nil, err
 		}

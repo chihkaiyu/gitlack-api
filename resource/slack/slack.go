@@ -13,14 +13,14 @@ type Slack interface {
 }
 
 type slack struct {
-	tool       resource.Util
+	client     resource.Client
 	SlackAPI   string
 	SlackToken string
 }
 
 func NewSlack(c *cli.Context) Slack {
 	return &slack{
-		tool:       resource.NewUtil(),
+		client:     resource.NewClient(),
 		SlackAPI:   fmt.Sprintf("%v://%v/api", c.String("slack-scheme"), c.String("slack-domain")),
 		SlackToken: c.String("slack-token"),
 	}

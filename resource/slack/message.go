@@ -52,7 +52,7 @@ func (s *slack) PostSlackMessage(channel, text string, atm *Attachment, thread .
 
 	url := s.SlackAPI + "/chat.postMessage"
 
-	res, err := s.tool.Request("POST", url, header, nil, reqBody)
+	res, err := s.client.Post(url, header, nil, reqBody)
 	if err != nil {
 		return nil, err
 	}

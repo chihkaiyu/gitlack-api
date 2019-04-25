@@ -114,11 +114,11 @@ func TestGetUserOnePage(t *testing.T) {
 		StatusCode: 200,
 		Body:       ioutil.NopCloser(bytes.NewReader(withoutCursorResponse)),
 	}
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeSlackAPI+"/users.list", mapNil, params, mapNil).Return(mockedRes, nil)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeSlackAPI+"/users.list", mapNil, params, mapNil).Return(mockedRes, nil)
 
 	s := &slack{
-		tool:       mockedUtil,
+		client:     mockedClient,
 		SlackAPI:   fakeSlackAPI,
 		SlackToken: "fake-slack-token",
 	}
@@ -132,7 +132,7 @@ func TestGetUserOnePage(t *testing.T) {
 		},
 	}
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Get", 1)
 	assert.Equal(1, len(users), "number of user should be equal")
 
 	for i, e := range expected {
@@ -164,12 +164,12 @@ func TestGetUserMultiplePages(t *testing.T) {
 		Body:       ioutil.NopCloser(bytes.NewReader(withoutCursorResponse)),
 	}
 
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeSlackAPI+"/users.list", mapNil, withoutCursorParams, mapNil).Return(mockedWithCursorRes, nil)
-	mockedUtil.On("Request", http.MethodGet, fakeSlackAPI+"/users.list", mapNil, withCursorParams, mapNil).Return(mockedWithoutCursorRes, nil)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeSlackAPI+"/users.list", mapNil, withoutCursorParams, mapNil).Return(mockedWithCursorRes, nil)
+	mockedClient.On("Get", fakeSlackAPI+"/users.list", mapNil, withCursorParams, mapNil).Return(mockedWithoutCursorRes, nil)
 
 	s := &slack{
-		tool:       mockedUtil,
+		client:     mockedClient,
 		SlackAPI:   fakeSlackAPI,
 		SlackToken: "fake-slack-token",
 	}
@@ -191,7 +191,7 @@ func TestGetUserMultiplePages(t *testing.T) {
 		},
 	}
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 2)
+	mockedClient.AssertNumberOfCalls(t, "Get", 2)
 	assert.Equal(3, len(users), "number of user should be equal")
 
 	for i, e := range expected {
@@ -211,11 +211,11 @@ func TestGetUserRequestFail(t *testing.T) {
 	}
 	mockedErr := errors.New("fake-error")
 
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeSlackAPI+"/users.list", mapNil, params, mapNil).Return(nil, mockedErr)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeSlackAPI+"/users.list", mapNil, params, mapNil).Return(nil, mockedErr)
 
 	s := &slack{
-		tool:       mockedUtil,
+		client:     mockedClient,
 		SlackAPI:   fakeSlackAPI,
 		SlackToken: "fake-slack-token",
 	}
@@ -223,7 +223,7 @@ func TestGetUserRequestFail(t *testing.T) {
 	users, err := s.GetUser()
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Get", 1)
 	assert.Equal(err.Error(), "fake-error", "error messages shoule be equal")
 	assert.Nil(users, "users shoule be nil")
 }
@@ -240,11 +240,11 @@ func TestGetUserSlackError(t *testing.T) {
 		Body:       ioutil.NopCloser(bytes.NewReader([]byte("fake-slack-error"))),
 	}
 
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeSlackAPI+"/users.list", mapNil, params, mapNil).Return(mockedRes, nil)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeSlackAPI+"/users.list", mapNil, params, mapNil).Return(mockedRes, nil)
 
 	s := &slack{
-		tool:       mockedUtil,
+		client:     mockedClient,
 		SlackAPI:   fakeSlackAPI,
 		SlackToken: "fake-slack-token",
 	}
@@ -252,7 +252,7 @@ func TestGetUserSlackError(t *testing.T) {
 	users, err := s.GetUser()
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Get", 1)
 	assert.Equal(err.Error(), "Slack error: fake-slack-error", "error messages shoule be equal")
 	assert.Nil(users, "users should be nil")
 }
@@ -275,12 +275,12 @@ func GetUserInfiniteLoop(t *testing.T) {
 		Body:       ioutil.NopCloser(bytes.NewReader(withCursorResponse)),
 	}
 
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeSlackAPI+"/users.list", mapNil, withoutCursorParams, mapNil).Return(mockedRes, nil)
-	mockedUtil.On("Request", http.MethodGet, fakeSlackAPI+"/users.list", mapNil, withCursorParams, mapNil).Return(mockedRes, nil)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeSlackAPI+"/users.list", mapNil, withoutCursorParams, mapNil).Return(mockedRes, nil)
+	mockedClient.On("Get", fakeSlackAPI+"/users.list", mapNil, withCursorParams, mapNil).Return(mockedRes, nil)
 
 	s := &slack{
-		tool:       mockedUtil,
+		client:     mockedClient,
 		SlackAPI:   fakeSlackAPI,
 		SlackToken: "fake-slack-token",
 	}
@@ -288,7 +288,7 @@ func GetUserInfiniteLoop(t *testing.T) {
 	users, err := s.GetUser()
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 100)
+	mockedClient.AssertNumberOfCalls(t, "Get", 100)
 	assert.Equal(200, len(users), "number of user should be equal")
 	assert.Nil(err)
 
