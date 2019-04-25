@@ -58,12 +58,12 @@ func TestPostSlackMessage(t *testing.T) {
 		StatusCode: 200,
 		Body:       ioutil.NopCloser(bytes.NewReader(slackRes.Bytes())),
 	}
-	mockedUtil := &mocks.Util{}
+	mockedClient := &mocks.Client{}
 	var mapNil map[string]string
-	mockedUtil.On("Request", "POST", fakeURL, fakeHeader, mapNil, fakeReqBody).Return(mockedRes, nil)
+	mockedClient.On("Post", fakeURL, fakeHeader, mapNil, fakeReqBody).Return(mockedRes, nil)
 
 	s := &slack{
-		tool:       mockedUtil,
+		client:     mockedClient,
 		SlackAPI:   fakeSlackAPI,
 		SlackToken: fakeSlackToken,
 	}
@@ -71,7 +71,7 @@ func TestPostSlackMessage(t *testing.T) {
 	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil)
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Post", 1)
 	assert.Nil(err)
 	assert.True(smr.OK)
 	assert.Equal(expectedRes["Channel"].(string), smr.Channel, "channel should be equal")
@@ -111,12 +111,12 @@ func TestPostSlackMessageWithAttachment(t *testing.T) {
 		StatusCode: 200,
 		Body:       ioutil.NopCloser(bytes.NewReader(slackRes.Bytes())),
 	}
-	mockedUtil := &mocks.Util{}
+	mockedClient := &mocks.Client{}
 	var mapNil map[string]string
-	mockedUtil.On("Request", "POST", fakeURL, fakeHeader, mapNil, fakeReqBody).Return(mockedRes, nil)
+	mockedClient.On("Post", fakeURL, fakeHeader, mapNil, fakeReqBody).Return(mockedRes, nil)
 
 	s := &slack{
-		tool:       mockedUtil,
+		client:     mockedClient,
 		SlackAPI:   fakeSlackAPI,
 		SlackToken: fakeSlackToken,
 	}
@@ -124,7 +124,7 @@ func TestPostSlackMessageWithAttachment(t *testing.T) {
 	smr, err := s.PostSlackMessage(fakeChannel, fakeText, fakeAtm)
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Post", 1)
 	assert.Nil(err)
 	assert.True(smr.OK)
 	assert.Equal(fakeChannel, smr.Channel, "channel should be equal")
@@ -157,12 +157,12 @@ func TestPostSlackMessageWithThread(t *testing.T) {
 		StatusCode: 200,
 		Body:       ioutil.NopCloser(bytes.NewReader(slackRes.Bytes())),
 	}
-	mockedUtil := &mocks.Util{}
+	mockedClient := &mocks.Client{}
 	var mapNil map[string]string
-	mockedUtil.On("Request", "POST", fakeURL, fakeHeader, mapNil, fakeReqBody).Return(mockedRes, nil)
+	mockedClient.On("Post", fakeURL, fakeHeader, mapNil, fakeReqBody).Return(mockedRes, nil)
 
 	s := &slack{
-		tool:       mockedUtil,
+		client:     mockedClient,
 		SlackAPI:   fakeSlackAPI,
 		SlackToken: fakeSlackToken,
 	}
@@ -170,7 +170,7 @@ func TestPostSlackMessageWithThread(t *testing.T) {
 	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil, fakeThreadTS)
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Post", 1)
 	assert.Nil(err)
 	assert.True(smr.OK)
 	assert.Equal(fakeChannel, smr.Channel, "channel should be equal")
@@ -198,12 +198,12 @@ func TestPostSlackMessageFail(t *testing.T) {
 		StatusCode: 200,
 		Body:       ioutil.NopCloser(bytes.NewReader(fakeFailSlackResponse)),
 	}
-	mockedUtil := &mocks.Util{}
+	mockedClient := &mocks.Client{}
 	var mapNil map[string]string
-	mockedUtil.On("Request", "POST", fakeURL, fakeHeader, mapNil, fakeReqBody).Return(mockedRes, nil)
+	mockedClient.On("Post", fakeURL, fakeHeader, mapNil, fakeReqBody).Return(mockedRes, nil)
 
 	s := &slack{
-		tool:       mockedUtil,
+		client:     mockedClient,
 		SlackAPI:   fakeSlackAPI,
 		SlackToken: fakeSlackToken,
 	}
@@ -211,7 +211,7 @@ func TestPostSlackMessageFail(t *testing.T) {
 	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil, fakeThreadTS)
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Post", 1)
 	assert.Nil(smr)
 	assert.Equal("Invalid Slack API: not_authed", err.Error(), "error message should be equal")
 }

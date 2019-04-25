@@ -56,11 +56,11 @@ func TestGetProjectOnePage(t *testing.T) {
 		Header:     map[string][]string{"X-Next-Page": []string{""}},
 	}
 
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeGitLabAPI+"/projects", mapNil, params, mapNil).Return(mockedRes, nil)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeGitLabAPI+"/projects", mapNil, params, mapNil).Return(mockedRes, nil)
 
 	g := &gitlab{
-		tool:         mockedUtil,
+		client:       mockedClient,
 		GitLabDomain: fakeGitLabDomain,
 		GitLabAPI:    fakeGitLabAPI,
 		GitLabToken:  fakeGitLabToken,
@@ -83,7 +83,7 @@ func TestGetProjectOnePage(t *testing.T) {
 		},
 	}
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Get", 1)
 	assert.Equal(3, len(projects), "number of projects should be equal")
 
 	for i, e := range expected {
@@ -123,12 +123,12 @@ func TestGetProjectMultiplePages(t *testing.T) {
 		Header:     map[string][]string{"X-Next-Page": []string{""}},
 	}
 
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeGitLabAPI+"/projects", mapNil, withoutPageParams, mapNil).Return(mockedWithPageRes, nil)
-	mockedUtil.On("Request", http.MethodGet, fakeGitLabAPI+"/projects", mapNil, withPageParams, mapNil).Return(mockedWithoutPageRes, nil)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeGitLabAPI+"/projects", mapNil, withoutPageParams, mapNil).Return(mockedWithPageRes, nil)
+	mockedClient.On("Get", fakeGitLabAPI+"/projects", mapNil, withPageParams, mapNil).Return(mockedWithoutPageRes, nil)
 
 	g := &gitlab{
-		tool:         mockedUtil,
+		client:       mockedClient,
 		GitLabDomain: fakeGitLabDomain,
 		GitLabAPI:    fakeGitLabAPI,
 		GitLabToken:  fakeGitLabToken,
@@ -155,7 +155,7 @@ func TestGetProjectMultiplePages(t *testing.T) {
 		},
 	}
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 2)
+	mockedClient.AssertNumberOfCalls(t, "Get", 2)
 	assert.Equal(4, len(projects), "number of project shoule be equal")
 
 	for i, e := range expected {
@@ -180,11 +180,11 @@ func TestGetProjectRequestFail(t *testing.T) {
 	}
 	mockedErr := errors.New("fake-error")
 
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeGitLabAPI+"/projects", mapNil, params, mapNil).Return(nil, mockedErr)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeGitLabAPI+"/projects", mapNil, params, mapNil).Return(nil, mockedErr)
 
 	g := &gitlab{
-		tool:         mockedUtil,
+		client:       mockedClient,
 		GitLabDomain: fakeGitLabDomain,
 		GitLabAPI:    fakeGitLabAPI,
 		GitLabToken:  fakeGitLabToken,
@@ -193,7 +193,7 @@ func TestGetProjectRequestFail(t *testing.T) {
 	projects, err := g.GetProject()
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Get", 1)
 	assert.Equal(err.Error(), "fake-error", "error messages should be equal")
 	assert.Nil(projects)
 }
@@ -215,11 +215,11 @@ func TestGetProjectGitLabError(t *testing.T) {
 		Header:     map[string][]string{"X-Next-Page": []string{""}},
 	}
 
-	mockedUtil := &mocks.Util{}
-	mockedUtil.On("Request", http.MethodGet, fakeGitLabAPI+"/projects", mapNil, params, mapNil).Return(mockedRes, nil)
+	mockedClient := &mocks.Client{}
+	mockedClient.On("Get", fakeGitLabAPI+"/projects", mapNil, params, mapNil).Return(mockedRes, nil)
 
 	g := &gitlab{
-		tool:         mockedUtil,
+		client:       mockedClient,
 		GitLabDomain: fakeGitLabDomain,
 		GitLabAPI:    fakeGitLabAPI,
 		GitLabToken:  fakeGitLabToken,
@@ -228,7 +228,7 @@ func TestGetProjectGitLabError(t *testing.T) {
 	projects, err := g.GetProject()
 
 	assert := assert.New(t)
-	mockedUtil.AssertNumberOfCalls(t, "Request", 1)
+	mockedClient.AssertNumberOfCalls(t, "Get", 1)
 	assert.Equal(err.Error(), "GitLab error: fake-gitlab-error", "error messages should be equal")
 	assert.Nil(projects)
 }

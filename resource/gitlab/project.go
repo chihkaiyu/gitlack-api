@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 
 	"gitlack/model"
 
@@ -30,7 +29,7 @@ func (g *gitlab) GetProject() ([]*model.Project, error) {
 	var allProjects []*model.Project
 	// run at most 100 times for preventing from infinite loop
 	for i := 0; i < 100; i++ {
-		res, err := g.tool.Request(http.MethodGet, url, nil, params, nil)
+		res, err := g.client.Get(url, nil, params, nil)
 		if err != nil {
 			return nil, err
 		}

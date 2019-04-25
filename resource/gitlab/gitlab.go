@@ -16,7 +16,7 @@ type GitLab interface {
 }
 
 type gitlab struct {
-	tool         resource.Util
+	client       resource.Client
 	GitLabDomain string
 	GitLabAPI    string
 	GitLabToken  string
@@ -24,7 +24,7 @@ type gitlab struct {
 
 func NewGitLab(c *cli.Context) GitLab {
 	return &gitlab{
-		tool:         resource.NewUtil(),
+		client:       resource.NewClient(),
 		GitLabDomain: c.String("gitlab-domain"),
 		GitLabAPI:    fmt.Sprintf("%v://%v/api/v4", c.String("gitlab-scheme"), c.String("gitlab-domain")),
 		GitLabToken:  c.String("gitlab-token"),

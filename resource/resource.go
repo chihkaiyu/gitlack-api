@@ -8,28 +8,51 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type Util interface {
-	Request(string, string, map[string]string, map[string]string, map[string]string) (*http.Response, error)
+// Client handles HTTP request
+type Client interface {
+	Get(string, map[string]string, map[string]string, map[string]string) (*http.Response, error)
+	Post(string, map[string]string, map[string]string, map[string]string) (*http.Response, error)
 }
 
-// Client stores token for getting user, project resources
-type external struct {
+// Client hold a HTTP client
+type client struct {
 	client *http.Client
 }
 
-func NewUtil() Util {
-	client := &http.Client{}
-	return &external{
-		client: client,
+// NewClient return a Request which handles HTTP request
+func NewClient() Client {
+	return &client{
+		client: &http.Client{},
 	}
 }
 
-func (e *external) Request(method, endpoint string, header map[string]string, param map[string]string, body map[string]string) (*http.Response, error) {
+func (c *client) Get(endpoint string, header map[string]string, param map[string]string, body map[string]string) (*http.Response, error) {
+	req, err := prepareRequest(http.MethodGet, endpoint, header, param, body)
+	response, err := c.client.Do(req)
+	if err != nil {
+		logrus.Errorln(err)
+		return nil, err
+	}
+	return response, nil
+}
+
+func (c *client) Post(endpoint string, header map[string]string, param map[string]string, body map[string]string) (*http.Response, error) {
+	req, err := prepareRequest(http.MethodPost, endpoint, header, param, body)
+	response, err := c.client.Do(req)
+	if err != nil {
+		logrus.Errorln(err)
+		return nil, err
+	}
+	return response, nil
+}
+
+func prepareRequest(method, endpoint string, header map[string]string, param map[string]string, body map[string]string) (*http.Request, error) {
 	// add body
 	reqBody := url.Values{}
 	for k, v := range body {
 		reqBody.Add(k, v)
 	}
+
 	req, err := http.NewRequest(method, endpoint, strings.NewReader(reqBody.Encode()))
 	if err != nil {
 		logrus.Errorln(err)
@@ -48,10 +71,5 @@ func (e *external) Request(method, endpoint string, header map[string]string, pa
 	}
 	req.URL.RawQuery = params.Encode()
 
-	res, err := e.client.Do(req)
-	if err != nil {
-		logrus.Errorln(err)
-		return nil, err
-	}
-	return res, nil
+	return req, nil
 }
