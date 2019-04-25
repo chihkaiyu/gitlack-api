@@ -216,6 +216,25 @@ POST /api/project
 }
 ```
 
+## Group
+Parameters:  
+- `namespace` - the top level group of the project
+- `path` - the other part of the group path
+- `channel` - the channel name you'd like to update and there is no need to add `#` before
+
+### Update Group
+Update all projects' default channel of a group. This endpoint takes value of `default_channel` from query string to update the default channels. No need to add `#` before the channle name.
+
+```
+PUT /api/group/:namespace/:path?default_channel=:channel
+```
+```
+{
+    "ok": true,
+    "message": "Group: chihkaiyu updated"
+}
+```
+
 ## GitLab Webhook
 The endpoint for GitLab webhook. GitLab don't care what content you return to it and Gitlack always returns `200` with a simple JSON body.  
 See [GitLab's webhook page](https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#webhook-endpoint-tips) for more information.
