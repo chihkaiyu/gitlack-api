@@ -20,10 +20,14 @@ type Handler interface {
 	UpdateProject(*gin.Context)
 	WrapSyncProject(*gin.Context)
 	SyncProject() error
+
+	UpdateGroup(*gin.Context)
+
 	GetUser(*gin.Context)
 	UpdateUser(*gin.Context)
 	WrapSyncUser(*gin.Context)
 	SyncUser() error
+
 	Webhook(*gin.Context)
 }
 
