@@ -120,9 +120,10 @@ func TestActiveMR(t *testing.T) {
 		"MRNum":    fakeData["ObjectNum"].(int),
 	}
 	slackExpected := renderTemplate(mrTemplate, expected)
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	mockedSlack := &mSlack.Slack{}
-	mockedSlack.On("PostSlackMessage", "general", slackExpected.String(), nilAtm).Return(mockedMessageReponse, nil)
+	mockedSlack.On("PostSlackMessage", "general", slackExpected.String(), nilUser, nilAtm).Return(mockedMessageReponse, nil)
 
 	w := &hook{
 		db: mockedDB,
@@ -223,6 +224,7 @@ func TestMRChannelFromDescription(t *testing.T) {
 	slackExpected := renderTemplate(mrTemplate, expected)
 	mockedSlack := &mSlack.Slack{}
 
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	input := map[string]string{
 		"/gitlack: fake-channel-1": "fake-channel-1",
@@ -244,7 +246,7 @@ func TestMRChannelFromDescription(t *testing.T) {
 		}
 
 		fakeData["Desc"] = fmt.Sprintf("a\\nb\\n%v", d)
-		mockedSlack.On("PostSlackMessage", c, slackExpected.String(), nilAtm).Return(mockedMessageReponse, nil)
+		mockedSlack.On("PostSlackMessage", c, slackExpected.String(), nilUser, nilAtm).Return(mockedMessageReponse, nil)
 		w.MergeRequestEvent(genMRBody(fakeData))
 
 		// wait for goroutine, work around
@@ -309,9 +311,10 @@ func TestMRChannelFromProject(t *testing.T) {
 		"MRNum":    fakeData["ObjectNum"].(int),
 	}
 	slackExpected := renderTemplate(mrTemplate, expected)
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	mockedSlack := &mSlack.Slack{}
-	mockedSlack.On("PostSlackMessage", mockedProject.DefaultChannel, slackExpected.String(), nilAtm).Return(mockedMessageReponse, nil)
+	mockedSlack.On("PostSlackMessage", mockedProject.DefaultChannel, slackExpected.String(), nilUser, nilAtm).Return(mockedMessageReponse, nil)
 
 	w := &hook{
 		db: mockedDB,
@@ -389,9 +392,10 @@ func TestMRChannelFromAssignee(t *testing.T) {
 		"MRNum":    fakeData["ObjectNum"].(int),
 	}
 	slackExpected := renderTemplate(mrTemplate, expected)
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	mockedSlack := &mSlack.Slack{}
-	mockedSlack.On("PostSlackMessage", mockedAssignee.DefaultChannel, slackExpected.String(), nilAtm).Return(mockedMessageReponse, nil)
+	mockedSlack.On("PostSlackMessage", mockedAssignee.DefaultChannel, slackExpected.String(), nilUser, nilAtm).Return(mockedMessageReponse, nil)
 
 	w := &hook{
 		db: mockedDB,
@@ -472,9 +476,10 @@ func TestMRChannelOverwrite(t *testing.T) {
 		"MRNum":    fakeData["ObjectNum"].(int),
 	}
 	slackExpected := renderTemplate(mrTemplate, expected)
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	mockedSlack := &mSlack.Slack{}
-	mockedSlack.On("PostSlackMessage", "fake-description-channel", slackExpected.String(), nilAtm).Return(mockedMessageReponse, nil)
+	mockedSlack.On("PostSlackMessage", "fake-description-channel", slackExpected.String(), nilUser, nilAtm).Return(mockedMessageReponse, nil)
 
 	w := &hook{
 		db: mockedDB,
@@ -522,6 +527,7 @@ func TestDeactiveMR(t *testing.T) {
 	mockedDB.On("GetMergeRequest", fakeData["ProjectID"].(int), fakeData["ObjectNum"].(int)).Return(mockedMR, nil)
 	mockedSlack := &mSlack.Slack{}
 
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	for a, e := range input {
 		fakeData["Action"] = a
@@ -529,7 +535,7 @@ func TestDeactiveMR(t *testing.T) {
 			db: mockedDB,
 			s:  mockedSlack,
 		}
-		mockedSlack.On("PostSlackMessage", mockedMR.Channel, e, nilAtm, mockedMR.ThreadTS).Return(nil, nil)
+		mockedSlack.On("PostSlackMessage", mockedMR.Channel, e, nilUser, nilAtm, mockedMR.ThreadTS).Return(nil, nil)
 		w.MergeRequestEvent(genMRBody(fakeData))
 	}
 }
@@ -597,9 +603,10 @@ func TestTrackPipelineStatusFail(t *testing.T) {
 	mockedDB.On("GetMergeRequest", fakeData["ProjectID"].(int), fakeData["ObjectNum"].(int)).Return(mockedMR, nil)
 
 	slackExpected := fmt.Sprintf("Pipeline <%v|#%v> failed!", fakeData["Path"].(string), fakeData["ProjectID"].(int))
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	mockedSlack := &mSlack.Slack{}
-	mockedSlack.On("PostSlackMessage", mockedMR.Channel, slackExpected, nilAtm, mockedMR.ThreadTS).Return(nil, nil)
+	mockedSlack.On("PostSlackMessage", mockedMR.Channel, slackExpected, nilUser, nilAtm, mockedMR.ThreadTS).Return(nil, nil)
 
 	w := &hook{
 		db: mockedDB,

@@ -49,9 +49,9 @@ func TestPostSlackMessage(t *testing.T) {
 		"text":    fakeText,
 	}
 	expectedRes := map[string]interface{}{
-		"OK": "true",
+		"OK":      "true",
 		"Channel": fakeReqBody["channel"],
-		"TS": "1234567890.123456",
+		"TS":      "1234567890.123456",
 	}
 	slackRes := renderTemplate(slackResponseTemplate, expectedRes)
 	mockedRes := &http.Response{
@@ -68,7 +68,7 @@ func TestPostSlackMessage(t *testing.T) {
 		SlackToken: fakeSlackToken,
 	}
 
-	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil)
+	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil, nil)
 
 	assert := assert.New(t)
 	mockedClient.AssertNumberOfCalls(t, "Post", 1)
@@ -90,21 +90,20 @@ func TestPostSlackMessageWithAttachment(t *testing.T) {
 	fakeAtm := &Attachment{
 		Color: AttachmentColor,
 		Title: "fake-title",
-		Text: fakeText,
-
+		Text:  fakeText,
 	}
 	serAtm, _ := json.Marshal([]*Attachment{fakeAtm})
 	fakeReqBody := map[string]string{
-		"token":   fakeSlackToken,
-		"channel": fakeChannel,
-		"text":    fakeText,
+		"token":       fakeSlackToken,
+		"channel":     fakeChannel,
+		"text":        fakeText,
 		"attachments": string(serAtm),
 	}
-	
+
 	expectedRes := map[string]interface{}{
-		"OK": "true",
+		"OK":      "true",
 		"Channel": fakeReqBody["channel"],
-		"TS": "1234567890.123456",
+		"TS":      "1234567890.123456",
 	}
 	slackRes := renderTemplate(slackResponseTemplate, expectedRes)
 	mockedRes := &http.Response{
@@ -121,7 +120,7 @@ func TestPostSlackMessageWithAttachment(t *testing.T) {
 		SlackToken: fakeSlackToken,
 	}
 
-	smr, err := s.PostSlackMessage(fakeChannel, fakeText, fakeAtm)
+	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil, fakeAtm)
 
 	assert := assert.New(t)
 	mockedClient.AssertNumberOfCalls(t, "Post", 1)
@@ -148,9 +147,9 @@ func TestPostSlackMessageWithThread(t *testing.T) {
 		"thread_ts": fakeThreadTS,
 	}
 	expectedRes := map[string]interface{}{
-		"OK": "true",
+		"OK":      "true",
 		"Channel": fakeReqBody["channel"],
-		"TS": "1234567890.123456",
+		"TS":      "1234567890.123456",
 	}
 	slackRes := renderTemplate(slackResponseTemplate, expectedRes)
 	mockedRes := &http.Response{
@@ -167,7 +166,7 @@ func TestPostSlackMessageWithThread(t *testing.T) {
 		SlackToken: fakeSlackToken,
 	}
 
-	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil, fakeThreadTS)
+	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil, nil, fakeThreadTS)
 
 	assert := assert.New(t)
 	mockedClient.AssertNumberOfCalls(t, "Post", 1)
@@ -208,7 +207,7 @@ func TestPostSlackMessageFail(t *testing.T) {
 		SlackToken: fakeSlackToken,
 	}
 
-	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil, fakeThreadTS)
+	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil, nil, fakeThreadTS)
 
 	assert := assert.New(t)
 	mockedClient.AssertNumberOfCalls(t, "Post", 1)

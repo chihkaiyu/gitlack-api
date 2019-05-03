@@ -67,7 +67,7 @@ func issuesComment(comment CommentsEvent, h *hook) {
 		logrus.Errorln(err)
 		return
 	}
-	h.s.PostSlackMessage(issue.Channel, slackText.String(), nil, issue.ThreadTS)
+	h.s.PostSlackMessage(issue.Channel, slackText.String(), author, nil, issue.ThreadTS)
 }
 
 func mrComment(comment CommentsEvent, h *hook) {
@@ -100,5 +100,5 @@ func mrComment(comment CommentsEvent, h *hook) {
 		logrus.Errorln(err)
 		return
 	}
-	h.s.PostSlackMessage(mr.Channel, slackText.String(), nil, mr.ThreadTS)
+	h.s.PostSlackMessage(mr.Channel, slackText.String(), nil, nil, mr.ThreadTS)
 }

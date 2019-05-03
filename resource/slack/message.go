@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"gitlack/model"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -28,7 +30,7 @@ type Attachment struct {
 	Text  string `json:"text"`
 }
 
-func (s *slack) PostSlackMessage(channel, text string, atm *Attachment, thread ...string) (*MessageResponse, error) {
+func (s *slack) PostSlackMessage(channel, text string, author *model.User, atm *Attachment, thread ...string) (*MessageResponse, error) {
 	header := map[string]string{
 		"Content-Type": "application/x-www-form-urlencoded",
 	}
