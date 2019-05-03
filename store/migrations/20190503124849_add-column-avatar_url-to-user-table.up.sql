@@ -1,0 +1,1 @@
+ALTER TABLE "main"."User" ADD COLUMN "avatar_url" varchar(255);
