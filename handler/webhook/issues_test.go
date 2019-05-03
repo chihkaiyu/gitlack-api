@@ -76,6 +76,9 @@ func TestIssuesEvent(t *testing.T) {
 		Title: fakeData["Title"].(string),
 		Text:  fakeData["Desc"].(string),
 	}
+	expectedUser := &model.User{
+		SlackID: "fake-author-slack-id",
+	}
 	expected := map[string]interface{}{
 		"Author":   mockedAuthor.SlackID,
 		"Path":     fakeData["Path"].(string),
@@ -84,7 +87,7 @@ func TestIssuesEvent(t *testing.T) {
 	}
 	slackExpected := renderTemplate(issueTemplate, expected)
 	mockedSlack := &mSlack.Slack{}
-	mockedSlack.On("PostSlackMessage", "general", slackExpected.String(), expectedAtm).Return(mockedMessageReponse, nil)
+	mockedSlack.On("PostSlackMessage", "general", slackExpected.String(), expectedUser, expectedAtm).Return(mockedMessageReponse, nil)
 
 	w := &hook{
 		db: mockedDB,
@@ -155,7 +158,10 @@ func TestIssuesChannelFromDescription(t *testing.T) {
 		fakeData["Desc"] = fmt.Sprintf("a\\nb\\n%v", d)
 		expectedAtm.Text = fmt.Sprintf("a\nb\n%v", d)
 		slackExpected := renderTemplate(issueTemplate, expected)
-		mockedSlack.On("PostSlackMessage", c, slackExpected.String(), expectedAtm).Return(mockedMessageReponse, nil)
+		expectedUser := &model.User{
+			SlackID: "fake-author-slack-id",
+		}
+		mockedSlack.On("PostSlackMessage", c, slackExpected.String(), expectedUser, expectedAtm).Return(mockedMessageReponse, nil)
 		w.IssuesEvent(genIssuesBody(fakeData))
 	}
 
@@ -206,8 +212,11 @@ func TestIssuesChannelFromProject(t *testing.T) {
 		"IssueNum": fakeData["ObjectNum"].(int),
 	}
 	slackExpected := renderTemplate(issueTemplate, expected)
+	expectedUser := &model.User{
+		SlackID: "fake-author-slack-id",
+	}
 	mockedSlack := &mSlack.Slack{}
-	mockedSlack.On("PostSlackMessage", mockedProject.DefaultChannel, slackExpected.String(), expectedAtm).Return(mockedMessageReponse, nil)
+	mockedSlack.On("PostSlackMessage", mockedProject.DefaultChannel, slackExpected.String(), expectedUser, expectedAtm).Return(mockedMessageReponse, nil)
 
 	w := &hook{
 		db: mockedDB,
@@ -263,8 +272,12 @@ func TestIssuesChannelFromAuthor(t *testing.T) {
 		"IssueNum": fakeData["ObjectNum"].(int),
 	}
 	slackExpected := renderTemplate(issueTemplate, expected)
+	expectedUser := &model.User{
+		SlackID:        "fake-author-slack-id",
+		DefaultChannel: "fake-default-author-channel",
+	}
 	mockedSlack := &mSlack.Slack{}
-	mockedSlack.On("PostSlackMessage", mockedAuthor.DefaultChannel, slackExpected.String(), expectedAtm).Return(mockedMessageReponse, nil)
+	mockedSlack.On("PostSlackMessage", mockedAuthor.DefaultChannel, slackExpected.String(), expectedUser, expectedAtm).Return(mockedMessageReponse, nil)
 
 	w := &hook{
 		db: mockedDB,
@@ -325,8 +338,12 @@ func TestIssuesChannelOverwrite(t *testing.T) {
 		"IssueNum": fakeData["ObjectNum"].(int),
 	}
 	slackExpected := renderTemplate(issueTemplate, expected)
+	expectedUser := &model.User{
+		SlackID:        "fake-author-slack-id",
+		DefaultChannel: "fake-default-author-channel",
+	}
 	mockedSlack := &mSlack.Slack{}
-	mockedSlack.On("PostSlackMessage", "fake-description-channel", slackExpected.String(), expectedAtm).Return(mockedMessageReponse, nil)
+	mockedSlack.On("PostSlackMessage", "fake-description-channel", slackExpected.String(), expectedUser, expectedAtm).Return(mockedMessageReponse, nil)
 
 	w := &hook{
 		db: mockedDB,
@@ -358,7 +375,8 @@ func TestDeactiveIssues(t *testing.T) {
 	mockedSlack := &mSlack.Slack{}
 
 	w := &hook{db: mockedDB, s: mockedSlack}
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
-	mockedSlack.On("PostSlackMessage", mockedIssue.Channel, "This issue has been closed.", nilAtm, mockedIssue.ThreadTS).Return(nil, nil)
+	mockedSlack.On("PostSlackMessage", mockedIssue.Channel, "This issue has been closed.", nilUser, nilAtm, mockedIssue.ThreadTS).Return(nil, nil)
 	w.IssuesEvent(genIssuesBody(fakeData))
 }

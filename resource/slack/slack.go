@@ -2,6 +2,7 @@ package slack
 
 import (
 	"fmt"
+	"gitlack/model"
 	"gitlack/resource"
 
 	"github.com/urfave/cli"
@@ -9,7 +10,7 @@ import (
 
 type Slack interface {
 	GetUser() ([]*SlackUser, error)
-	PostSlackMessage(string, string, *Attachment, ...string) (*MessageResponse, error)
+	PostSlackMessage(string, string, *model.User, *Attachment, ...string) (*MessageResponse, error)
 }
 
 type slack struct {

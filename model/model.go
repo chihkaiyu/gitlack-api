@@ -13,6 +13,7 @@ type User struct {
 	SlackID        string `db:"slack_id"`
 	GitLabID       int    `db:"gitlab_id"`
 	Name           string `db:"name"`
+	AvatarURL      string `db:"avatar_url"`
 	DefaultChannel string `db:"default_channel"`
 }
 

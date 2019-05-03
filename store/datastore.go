@@ -152,9 +152,9 @@ func (ds *datastore) UpdateGroupDefaultChannel(name, channel string) error {
 
 func (ds *datastore) CreateUser(u *model.User) error {
 	sql := `
-INSERT INTO User (gitlab_id, email, slack_id, name)
-VALUES (:gitlab_id, :email, :slack_id, :name)
-ON CONFLICT(gitlab_id) DO UPDATE SET email=:email, slack_id=:slack_id, name=:name
+INSERT INTO User (gitlab_id, email, slack_id, name, avatar_url)
+VALUES (:gitlab_id, :email, :slack_id, :name, :avatar_url)
+ON CONFLICT(gitlab_id) DO UPDATE SET email=:email, slack_id=:slack_id, name=:name, avatar_url=:avatar_url
 `
 	_, err := ds.NamedExec(sql, u)
 	if err != nil {

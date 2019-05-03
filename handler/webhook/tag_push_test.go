@@ -6,8 +6,8 @@ import (
 
 	"gitlack/model"
 
-	"gitlack/resource/slack"
 	"gitlack/resource/gitlab"
+	"gitlack/resource/slack"
 
 	mGitLab "gitlack/resource/gitlab/mocks"
 	mSlack "gitlack/resource/slack/mocks"
@@ -62,11 +62,12 @@ func TestTagPushEvent(t *testing.T) {
 		"Link":   fmt.Sprintf("http://fake.com/%v/tags/%v", fakeData["Path"].(string), mockedTagList[0].Name),
 	}
 	slackExpected := renderTemplate(tagPushTemplate, expected)
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	mockedGitLab.On("GetTagList", fakeData["ProjectID"].(int)).Return(mockedTagList, nil)
 	mockedDB.On("GetUserByID", fakeData["UserID"].(int)).Return(mockedAuthor, nil)
 	mockedDB.On("GetProjectByID", fakeData["ProjectID"].(int)).Return(mockedProject, nil)
-	mockedSlack.On("PostSlackMessage", "general", slackExpected.String(), nilAtm).Return(nil, nil)
+	mockedSlack.On("PostSlackMessage", "general", slackExpected.String(), nilUser, nilAtm).Return(nil, nil)
 
 	w := &hook{
 		db: mockedDB,
@@ -144,11 +145,12 @@ func TestTagPushOnlyOneTag(t *testing.T) {
 		"Link":   fmt.Sprintf("http://fake.com/%v/tags/%v", fakeData["Path"].(string), mockedTagList[0].Name),
 	}
 	slackExpected := renderTemplate(tagPushTemplate, expected)
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	mockedGitLab.On("GetTagList", fakeData["ProjectID"].(int)).Return(mockedTagList, nil)
 	mockedDB.On("GetUserByID", fakeData["UserID"].(int)).Return(mockedAuthor, nil)
 	mockedDB.On("GetProjectByID", fakeData["ProjectID"].(int)).Return(mockedProject, nil)
-	mockedSlack.On("PostSlackMessage", "general", slackExpected.String(), nilAtm).Return(nil, nil)
+	mockedSlack.On("PostSlackMessage", "general", slackExpected.String(), nilUser, nilAtm).Return(nil, nil)
 
 	w := &hook{
 		db: mockedDB,
@@ -201,6 +203,7 @@ func TestTagPushChannelFromMessage(t *testing.T) {
 		"Link":   fmt.Sprintf("http://fake.com/%v/tags/%v", fakeData["Path"].(string), mockedTagList[0].Name),
 	}
 	slackExpected := renderTemplate(tagPushTemplate, expected)
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	mockedGitLab.On("GetTagList", fakeData["ProjectID"].(int)).Return(mockedTagList, nil)
 	mockedDB.On("GetUserByID", fakeData["UserID"].(int)).Return(mockedAuthor, nil)
@@ -221,7 +224,7 @@ func TestTagPushChannelFromMessage(t *testing.T) {
 		}
 
 		fakeData["Message"] = fmt.Sprintf("a\\nb\\n%v", m)
-		mockedSlack.On("PostSlackMessage", c, slackExpected.String(), nilAtm).Return(nil, nil)
+		mockedSlack.On("PostSlackMessage", c, slackExpected.String(), nilUser, nilAtm).Return(nil, nil)
 		body := renderTemplate(tagPushBodyTemplate, fakeData)
 		w.TagPushEvent(body.Bytes())
 	}
@@ -269,11 +272,12 @@ func TestTagPushChannelFromProject(t *testing.T) {
 		"Link":   fmt.Sprintf("http://fake.com/%v/tags/%v", fakeData["Path"].(string), mockedTagList[0].Name),
 	}
 	slackExpected := renderTemplate(tagPushTemplate, expected)
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	mockedGitLab.On("GetTagList", fakeData["ProjectID"].(int)).Return(mockedTagList, nil)
 	mockedDB.On("GetUserByID", fakeData["UserID"].(int)).Return(mockedAuthor, nil)
 	mockedDB.On("GetProjectByID", fakeData["ProjectID"].(int)).Return(mockedProject, nil)
-	mockedSlack.On("PostSlackMessage", mockedProject.DefaultChannel, slackExpected.String(), nilAtm).Return(nil, nil)
+	mockedSlack.On("PostSlackMessage", mockedProject.DefaultChannel, slackExpected.String(), nilUser, nilAtm).Return(nil, nil)
 
 	w := &hook{
 		db: mockedDB,
@@ -328,11 +332,12 @@ func TestTagPushChannelFromAuthor(t *testing.T) {
 		"Link":   fmt.Sprintf("http://fake.com/%v/tags/%v", fakeData["Path"].(string), mockedTagList[0].Name),
 	}
 	slackExpected := renderTemplate(tagPushTemplate, expected)
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	mockedGitLab.On("GetTagList", fakeData["ProjectID"].(int)).Return(mockedTagList, nil)
 	mockedDB.On("GetUserByID", fakeData["UserID"].(int)).Return(mockedAuthor, nil)
 	mockedDB.On("GetProjectByID", fakeData["ProjectID"].(int)).Return(mockedProject, nil)
-	mockedSlack.On("PostSlackMessage", mockedAuthor.DefaultChannel, slackExpected.String(), nilAtm).Return(nil, nil)
+	mockedSlack.On("PostSlackMessage", mockedAuthor.DefaultChannel, slackExpected.String(), nilUser, nilAtm).Return(nil, nil)
 
 	w := &hook{
 		db: mockedDB,
@@ -387,11 +392,12 @@ func TestTagPushChannelOverwrite(t *testing.T) {
 		"Link":   fmt.Sprintf("http://fake.com/%v/tags/%v", fakeData["Path"].(string), mockedTagList[0].Name),
 	}
 	slackExpected := renderTemplate(tagPushTemplate, expected)
+	var nilUser *model.User
 	var nilAtm *slack.Attachment
 	mockedGitLab.On("GetTagList", fakeData["ProjectID"].(int)).Return(mockedTagList, nil)
 	mockedDB.On("GetUserByID", fakeData["UserID"].(int)).Return(mockedAuthor, nil)
 	mockedDB.On("GetProjectByID", fakeData["ProjectID"].(int)).Return(mockedProject, nil)
-	mockedSlack.On("PostSlackMessage", "fake-channel", slackExpected.String(), nilAtm).Return(nil, nil)
+	mockedSlack.On("PostSlackMessage", "fake-channel", slackExpected.String(), nilUser, nilAtm).Return(nil, nil)
 
 	w := &hook{
 		db: mockedDB,

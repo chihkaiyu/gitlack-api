@@ -75,17 +75,17 @@ func TestGetUserOnePage(t *testing.T) {
 		map[string]interface{}{
 			"ID":    1,
 			"Email": "fake.1@fake.com",
-			"Name": "fake-name-1",
+			"Name":  "fake-name-1",
 		},
 		map[string]interface{}{
 			"ID":    2,
 			"Email": "fake.2@fake.com",
-			"Name": "fake-name-2",
+			"Name":  "fake-name-2",
 		},
 		map[string]interface{}{
 			"ID":    3,
 			"Email": "fake.3@fake.com",
-			"Name": "fake-name-3",
+			"Name":  "fake-name-3",
 		},
 	}
 	assert := assert.New(t)
@@ -143,22 +143,22 @@ func TestGetUserMultiplePage(t *testing.T) {
 		map[string]interface{}{
 			"ID":    1,
 			"Email": "fake.1@fake.com",
-			"Name": "fake-name-1",
+			"Name":  "fake-name-1",
 		},
 		map[string]interface{}{
 			"ID":    2,
 			"Email": "fake.2@fake.com",
-			"Name": "fake-name-2",
+			"Name":  "fake-name-2",
 		},
 		map[string]interface{}{
 			"ID":    3,
 			"Email": "fake.3@fake.com",
-			"Name": "fake-name-3",
+			"Name":  "fake-name-3",
 		},
 		map[string]interface{}{
 			"ID":    4,
 			"Email": "fake.4@fake.com",
-			"Name": "fake-name-4",
+			"Name":  "fake-name-4",
 		},
 	}
 	assert := assert.New(t)

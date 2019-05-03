@@ -128,7 +128,7 @@ func activeMR(mr MergeRequestEvent, h *hook) {
 		logrus.Errorln(err)
 		return
 	}
-	smr, err := h.s.PostSlackMessage(channel, slackText.String(), nil)
+	smr, err := h.s.PostSlackMessage(channel, slackText.String(), nil, nil)
 	if err != nil {
 		logrus.Errorln(err)
 		return
@@ -164,7 +164,7 @@ func deactiveMR(mr MergeRequestEvent, h *hook) {
 		slackText += "closed."
 	}
 
-	h.s.PostSlackMessage(mrThread.Channel, slackText, nil, mrThread.ThreadTS)
+	h.s.PostSlackMessage(mrThread.Channel, slackText, nil, nil, mrThread.ThreadTS)
 }
 
 // for easy writing test
@@ -184,7 +184,7 @@ func trackPipelineStatus(mr MergeRequestEvent, h *hook) {
 				return
 			}
 			slackText := fmt.Sprintf("Pipeline <%v|#%v> failed!", commit.LastPipeline.WebURL, commit.LastPipeline.ID)
-			h.s.PostSlackMessage(mrThread.Channel, slackText, nil, mrThread.ThreadTS)
+			h.s.PostSlackMessage(mrThread.Channel, slackText, nil, nil, mrThread.ThreadTS)
 			return
 		} else if commit.LastPipeline.Status == "success" {
 			return

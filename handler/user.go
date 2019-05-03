@@ -38,6 +38,7 @@ func (r *router) GetUser(c *gin.Context) {
 			"slack_id":        u.SlackID,
 			"gitlab_id":       u.GitLabID,
 			"name":            u.Name,
+			"avatar_url":      u.AvatarURL,
 			"default_channel": u.DefaultChannel,
 		},
 	})
@@ -119,10 +120,11 @@ func (r *router) SyncUser() error {
 	for _, g := range gitlabUsers {
 		email := strings.Split(g.Email, "@")[0]
 		u := &model.User{
-			Email:    email,
-			SlackID:  "",
-			GitLabID: g.ID,
-			Name:     g.Name,
+			Email:     email,
+			SlackID:   "",
+			GitLabID:  g.ID,
+			Name:      g.Name,
+			AvatarURL: "",
 		}
 		combinedUsers[g.Email] = u
 	}
@@ -130,6 +132,7 @@ func (r *router) SyncUser() error {
 	for _, s := range slackUsers {
 		if u, exist := combinedUsers[s.Email]; exist {
 			u.SlackID = s.ID
+			u.AvatarURL = s.AvatarURL
 			combinedUsers[s.Email] = u
 		}
 	}

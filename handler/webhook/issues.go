@@ -1,10 +1,10 @@
 package webhook
 
 import (
-	"gitlack/resource/slack"
 	"bytes"
 	"encoding/json"
 	"gitlack/model"
+	"gitlack/resource/slack"
 	"regexp"
 	"strings"
 	"text/template"
@@ -84,7 +84,7 @@ func activeIssue(issue IssuesEvent, h *hook) {
 	attachment := &slack.Attachment{
 		Color: slack.AttachmentColor,
 		Title: issue.ObjAttr.Title,
-		Text: issue.ObjAttr.Description,
+		Text:  issue.ObjAttr.Description,
 	}
 	data := map[string]interface{}{
 		"Author":   author.SlackID,
@@ -103,7 +103,7 @@ func activeIssue(issue IssuesEvent, h *hook) {
 		logrus.Errorln(err)
 		return
 	}
-	smr, err := h.s.PostSlackMessage(channel, slackText.String(), attachment)
+	smr, err := h.s.PostSlackMessage(channel, slackText.String(), author, attachment)
 	if err != nil {
 		logrus.Errorln(err)
 		return
@@ -128,5 +128,5 @@ func deactiveIssue(issue IssuesEvent, h *hook) {
 		return
 	}
 	slackText := "This issue has been closed."
-	h.s.PostSlackMessage(issueThread.Channel, slackText, nil, issueThread.ThreadTS)
+	h.s.PostSlackMessage(issueThread.Channel, slackText, nil, nil, issueThread.ThreadTS)
 }

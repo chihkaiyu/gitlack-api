@@ -101,5 +101,5 @@ func (h *hook) TagPushEvent(b []byte) {
 		logrus.Errorln(err)
 		return
 	}
-	_, err = h.s.PostSlackMessage(channel, slackText.String(), nil)
+	_, err = h.s.PostSlackMessage(channel, slackText.String(), nil, nil)
 }
