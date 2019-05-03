@@ -50,6 +50,11 @@ func (s *slack) PostSlackMessage(channel, text string, atm *Attachment, thread .
 		reqBody["attachments"] = string(marshaledAtm)
 	}
 
+	if author != nil {
+		reqBody["username"] = author.Name + " (Gitlack)"
+		reqBody["icon_url"] = author.AvatarURL
+	}
+
 	url := s.SlackAPI + "/chat.postMessage"
 
 	res, err := s.client.Post(url, header, nil, reqBody)
