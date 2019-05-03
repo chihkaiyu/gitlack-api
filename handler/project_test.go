@@ -1,81 +1,47 @@
 package handler
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"gitlack/model"
-	mGitLab "gitlack/resource/gitlab/mocks"
-	mDB "gitlack/store/mocks"
 )
 
-func TestSyncProject(t *testing.T) {
-	mockedDB := &mDB.Store{}
-	mockedGitLab := &mGitLab.GitLab{}
+func TestSyncProjectWithFiveProjects(t *testing.T) {
+	// arrange
+	stubGitLab := getStubGetProjectGitLab(getProjects(5))
+	stubDB := getStubDB("CreateProject", nil)
+	router := getRouter(stubDB, nil, stubGitLab)
 
-	var mockedProject []*model.Project
-	for i := 0; i < 10; i++ {
-		tmp := &model.Project{
-			ID:   i,
-			Name: fmt.Sprintf("fake-project-%d", i),
-		}
-		mockedProject = append(mockedProject, tmp)
-	}
+	// act
+	router.SyncProject()
 
-	mockedGitLab.On("GetProject").Return(mockedProject, nil)
-	for _, mp := range mockedProject {
-		mockedDB.On("CreateProject", mp).Return(nil)
-	}
-
-	h := &router{
-		db: mockedDB,
-		g:  mockedGitLab,
-	}
-	err := h.SyncProject()
-
-	assert := assert.New(t)
-	mockedGitLab.AssertNumberOfCalls(t, "GetProject", 1)
-	mockedDB.AssertNumberOfCalls(t, "CreateProject", len(mockedProject))
-	assert.Nil(err)
+	// assert
+	stubDB.AssertNumberOfCalls(t, "CreateProject", 5)
 }
 
-func TestCreateProjectFail(t *testing.T) {
-	mockedDB := &mDB.Store{}
-	mockedGitLab := &mGitLab.GitLab{}
+func TestSyncProjectWithNoError(t *testing.T) {
+	// arrange
+	stubGitLab := getStubGetProjectGitLab(getProjects(5))
+	stubDB := getStubDB("CreateProject", nil)
+	router := getRouter(stubDB, nil, stubGitLab)
 
-	var mockedProject []*model.Project
-	for i := 0; i < 10; i++ {
-		tmp := &model.Project{
-			ID:   i,
-			Name: fmt.Sprintf("fake-project-%d", i),
-		}
-		mockedProject = append(mockedProject, tmp)
-	}
+	// act
+	err := router.SyncProject()
 
-	mockedGitLab.On("GetProject").Return(mockedProject, nil)
-	var mockedErrorMsg []string
-	for i := 0; i < 5; i++ {
-		mockedErrorMsg = append(mockedErrorMsg, fmt.Sprintf("fake-project-%d", i))
-		mockedDB.On("CreateProject", mockedProject[i]).Return(errors.New("fake-error"))
-	}
-	for i := 5; i < 10; i++ {
-		mockedDB.On("CreateProject", mockedProject[i]).Return(nil)
-	}
+	// assert
+	assert.NoError(t, err, "Should not have error")
+}
 
-	h := &router{
-		db: mockedDB,
-		g:  mockedGitLab,
-	}
-	err := h.SyncProject()
+func TestSyncProjectWithCreateProjectFail(t *testing.T) {
+	// arrange
+	stubGitLab := getStubGetProjectGitLab(getProjects(5))
+	stubDB := getStubDB("CreateProject", fmt.Errorf("fake-error"))
+	router := getRouter(stubDB, nil, stubGitLab)
 
-	expected, _ := json.Marshal(mockedErrorMsg)
-	assert := assert.New(t)
-	mockedGitLab.AssertNumberOfCalls(t, "GetProject", 1)
-	mockedDB.AssertNumberOfCalls(t, "CreateProject", len(mockedProject))
-	assert.NotNil(err, "error should be nil")
-	assert.Equal(string(expected), err.Error(), "error message should be equal")
+	// act
+	err := router.SyncProject()
+
+	// assert
+	assert.Error(t, err, "Error should not be nil")
 }

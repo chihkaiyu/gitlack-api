@@ -32,15 +32,8 @@ func (r *router) GetUser(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"ok": true,
-		"user": map[string]interface{}{
-			"email":           u.Email,
-			"slack_id":        u.SlackID,
-			"gitlab_id":       u.GitLabID,
-			"name":            u.Name,
-			"avatar_url":      u.AvatarURL,
-			"default_channel": u.DefaultChannel,
-		},
+		"ok":   true,
+		"user": u,
 	})
 }
 

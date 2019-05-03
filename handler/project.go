@@ -32,12 +32,8 @@ func (r *router) GetProject(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"ok": true,
-		"project": map[string]interface{}{
-			"gitlab_id":       p.ID,
-			"name":            p.Name,
-			"default_channel": p.DefaultChannel,
-		},
+		"ok":      true,
+		"project": p,
 	})
 }
 
