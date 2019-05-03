@@ -1,55 +1,47 @@
 package gitlab
 
 import (
-	"bytes"
-	"fmt"
-	"gitlack/resource/mocks"
-	"io/ioutil"
 	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var singleCommitResponse = []byte(`
-{
-	"committer_email": "fake-1@fake.com",
-	"last_pipeline": {
-		"id": 1,
-		"status": "success",
-		"WebURL": "http://gitlab.fake.com"
-	}
+func TestGetSingleCommitWithCommit(t *testing.T) {
+	// arrange
+	stubByte, expected := getCommit()
+	stubClient := getGetClientWithResponse(stubByte, http.StatusOK, "")
+	g := getGitLab(stubClient)
+
+	// act
+	actual, _ := g.GetSingleCommit(1, "fake-sha")
+
+	// assert
+	assert.Equal(t, expected, actual, "Commit' content should be equal")
 }
-`)
 
-func TestGetSingleCommit(t *testing.T) {
-	fakeID := 999
-	fakeSha := "fake-sha"
-	fakeGitLabToken := "fake-gitlab-token"
-	fakeGitLabDomain := "fake"
-	fakeGitLabAPI := fmt.Sprintf("https://%v/api/v4", fakeGitLabDomain)
-	var mapNil map[string]string
-	params := map[string]string{
-		"private_token": fakeGitLabToken,
-	}
-	mockedRes := &http.Response{
-		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewReader(singleCommitResponse)),
-	}
+func TestGetSingleCommitRequestError(t *testing.T) {
+	// arrange
+	stubClient := getGetClientWithError("fake-error")
+	g := getGitLab(stubClient)
 
-	mockedClient := &mocks.Client{}
-	mockedClient.On("Get", fakeGitLabAPI+fmt.Sprintf("/projects/%v/repository/commits/%v", fakeID, fakeSha), mapNil, params, mapNil).Return(mockedRes, nil)
+	// act
+	_, err := g.GetSingleCommit(1, "fake-sha")
 
-	g := &gitlab{
-		client:       mockedClient,
-		GitLabDomain: fakeGitLabDomain,
-		GitLabAPI:    fakeGitLabAPI,
-		GitLabToken:  fakeGitLabToken,
-	}
+	// assert
+	assert.NotNil(t, err, "Error should not be nil")
+	assert.Equal(t, "fake-error", err.Error(), "Error message should be equal")
+}
 
-	_, err := g.GetSingleCommit(fakeID, fakeSha)
+func TestGetSingleCommitInvalidGitLabAPI(t *testing.T) {
+	// arrange
+	stubClient := getGetClientWithResponse([]byte(`fake-body`), http.StatusNotFound, "")
+	g := getGitLab(stubClient)
 
-	assert := assert.New(t)
-	mockedClient.AssertNumberOfCalls(t, "Get", 1)
-	assert.Nil(err)
+	// act
+	_, err := g.GetSingleCommit(1, "fake-sha")
+
+	// assert
+	assert.NotNil(t, err, "Error should not be nil")
+	assert.Equal(t, "Invalid GitLab API error: fake-body", err.Error(), "Error message should be equal")
 }

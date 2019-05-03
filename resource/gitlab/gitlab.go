@@ -3,9 +3,10 @@ package gitlab
 import (
 	"fmt"
 
-	"github.com/urfave/cli"
 	"gitlack/model"
 	"gitlack/resource"
+
+	"github.com/urfave/cli"
 )
 
 type GitLab interface {

@@ -2,7 +2,6 @@ package gitlab
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 
@@ -56,9 +55,9 @@ func (g *gitlab) GetTagList(id int) ([]*Tag, error) {
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		errMsg := fmt.Sprintf("GitLab error: %v", string(body))
-		logrus.Errorln(errMsg)
-		return nil, errors.New(errMsg)
+		err := fmt.Errorf("Invalid GitLab API error: %v", string(body))
+		logrus.Errorln(err)
+		return nil, err
 	}
 	var tagList []*Tag
 	err = json.Unmarshal(body, &tagList)

@@ -2,7 +2,6 @@ package gitlab
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 
@@ -39,9 +38,9 @@ func (g *gitlab) GetUser() ([]*GitLabUser, error) {
 		}
 
 		if res.StatusCode != 200 {
-			errMsg := fmt.Sprintf("GitLab error: %v", string(body))
-			logrus.Errorln(errMsg)
-			return nil, errors.New(errMsg)
+			err := fmt.Errorf("Invalid GitLab API error: %v", string(body))
+			logrus.Errorln(err)
+			return nil, err
 		}
 
 		var user []*GitLabUser
