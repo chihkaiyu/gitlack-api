@@ -2,7 +2,6 @@ package slack
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 
@@ -30,6 +29,8 @@ type Member struct {
 
 // SlackUserResponse is the response of getting Slack user list
 type SlackUserResponse struct {
+	OK               bool             `json:"ok"`
+	Error            string           `json:"error"`
 	ResponseMetadata ResponseMetadata `json:"response_metadata"`
 	Members          []Member         `json:"members"`
 }
@@ -61,9 +62,9 @@ func (s *slack) GetUser() ([]*SlackUser, error) {
 		}
 
 		if res.StatusCode != 200 {
-			errMsg := fmt.Sprintf("Slack error: %v", string(body))
-			logrus.Errorln(errMsg)
-			return nil, errors.New(errMsg)
+			err := fmt.Errorf("HTTP response error: %v", string(body))
+			logrus.Errorln(err)
+			return nil, err
 		}
 
 		var slackResponse SlackUserResponse
@@ -72,6 +73,13 @@ func (s *slack) GetUser() ([]*SlackUser, error) {
 			logrus.Errorln(err)
 			return nil, err
 		}
+
+		if !slackResponse.OK {
+			err := fmt.Errorf("Invalid Slack API: %v", slackResponse.Error)
+			logrus.Errorln(err)
+			return nil, err
+		}
+
 		for _, u := range slackResponse.Members {
 			if u.IsBot || u.Deleted {
 				continue

@@ -72,9 +72,9 @@ func (s *slack) PostSlackMessage(channel, text string, author *model.User, atm *
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		errMsg := fmt.Sprintf("Network error: %v", string(body))
-		logrus.Errorln(errMsg)
-		return nil, errors.New(errMsg)
+		err := fmt.Errorf("HTTP response error: %v", string(body))
+		logrus.Errorln(err)
+		return nil, err
 	}
 
 	var smr MessageResponse
