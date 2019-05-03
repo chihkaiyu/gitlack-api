@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/golang-migrate/migrate/v4"
-    _ "github.com/golang-migrate/migrate/v4/database/sqlite3"
-    _ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/sqlite3"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/robfig/cron"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -70,7 +70,7 @@ func checkMigration(c *cli.Context) error {
 		logrus.Fatalln(err)
 	}
 	defer m.Close()
-	
+
 	v, dirty, _ := m.Version()
 	logrus.Debugf("Version: %v, Dirty: %v", v, dirty)
 
@@ -79,6 +79,6 @@ func checkMigration(c *cli.Context) error {
 	if err != nil && err.Error() != migrate.ErrNoChange.Error() {
 		logrus.Fatalln(err)
 	}
-	
+
 	return nil
 }
