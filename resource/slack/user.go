@@ -16,7 +16,8 @@ type ResponseMetadata struct {
 
 // Profile is the field represents the personal profile of Slack user
 type Profile struct {
-	Email string `json:"email"`
+	Email     string `json:"email"`
+	AvatarURL string `json:"image_72"`
 }
 
 // Member is the field represents the information about Slack user
@@ -34,8 +35,9 @@ type SlackUserResponse struct {
 }
 
 type SlackUser struct {
-	ID    string
-	Email string
+	ID        string
+	Email     string
+	AvatarURL string
 }
 
 func (s *slack) GetUser() ([]*SlackUser, error) {
@@ -75,8 +77,9 @@ func (s *slack) GetUser() ([]*SlackUser, error) {
 				continue
 			}
 			slackUser := &SlackUser{
-				ID:    u.ID,
-				Email: u.Profile.Email,
+				ID:        u.ID,
+				Email:     u.Profile.Email,
+				AvatarURL: u.Profile.AvatarURL,
 			}
 			allUsers = append(allUsers, slackUser)
 		}
