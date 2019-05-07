@@ -1,175 +1,61 @@
 package gitlab
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"gitlack/resource/mocks"
 )
 
-var listTagResponse = []byte(`
-[
-	{
-		"name": "v0.0.3",
-        "commit": {
-            "committer_email": "fake-3@fake.com"
-        },
-        "release": {
-            "description": "fake-release-notes-3"
-        }
-    },
-    {
-		"name": "v0.0.2",
-        "commit": {
-            "committer_email": "fake-2@fake.com"
-        },
-        "release": {
-            "description": "fake-release-notes-2"
-        }
-    },
-    {
-		"name": "v0.0.1",
-        "commit": {
-            "committer_email": "fake-1@fake.com"
-        },
-        "release": {
-            "description": "fake-release-notes-1"
-        }
-    }
-]
-`)
+func TestGetTagListGetOnce(t *testing.T) {
+	// arrange
+	stubByte, _ := getTagListResponse(1)
+	stubClient := getGetClientWithResponse(stubByte, http.StatusOK, "")
+	g := getGitLab(stubClient)
 
-func TestGetTagList(t *testing.T) {
-	fakeID := 999
-	fakeGitLabToken := "fake-gitlab-token"
-	fakeGitLabDomain := "fake"
-	fakeGitLabAPI := fmt.Sprintf("https://%v/api/v4", fakeGitLabDomain)
-	var mapNil map[string]string
-	params := map[string]string{
-		"private_token": fakeGitLabToken,
-	}
-	mockedRes := &http.Response{
-		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewReader(listTagResponse)),
-	}
+	// act
+	g.GetTagList(1)
 
-	mockedClient := &mocks.Client{}
-	mockedClient.On("Get", fakeGitLabAPI+fmt.Sprintf("/projects/%v/repository/tags", fakeID), mapNil, params, mapNil).Return(mockedRes, nil)
-
-	g := &gitlab{
-		client:       mockedClient,
-		GitLabDomain: fakeGitLabDomain,
-		GitLabAPI:    fakeGitLabAPI,
-		GitLabToken:  fakeGitLabToken,
-	}
-
-	tags, err := g.GetTagList(fakeID)
-
-	expectedCommit := []map[string]string{
-		map[string]string{
-			"CommitterEmail": "fake-3@fake.com",
-		},
-		map[string]string{
-			"CommitterEmail": "fake-2@fake.com",
-		},
-		map[string]string{
-			"CommitterEmail": "fake-1@fake.com",
-		},
-	}
-	expectedRelease := []map[string]string{
-		map[string]string{
-			"Name":        "v0.0.3",
-			"Description": "fake-release-notes-3",
-		},
-		map[string]string{
-			"Name":        "v0.0.2",
-			"Description": "fake-release-notes-2",
-		},
-		map[string]string{
-			"Name":        "v0.0.1",
-			"Description": "fake-release-notes-1",
-		},
-	}
-
-	assert := assert.New(t)
-	mockedClient.AssertNumberOfCalls(t, "Get", 1)
-	assert.Equal(3, len(tags), "number of tag should be equal")
-
-	for i, e := range expectedCommit {
-		assert.Equal(tags[i].CommitInfo.CommitterEmail, e["CommitterEmail"], "committer email should be equal")
-	}
-	for i, e := range expectedRelease {
-		assert.Equal(e["Name"], tags[i].Name, "tag name should be equal")
-		assert.Equal(e["Description"], tags[i].ReleaseInfo.Description, "description should be equal")
-	}
-
-	assert.Nil(err)
+	// assert
+	stubClient.AssertNumberOfCalls(t, "Get", 1)
 }
 
-func TestGetTagListRequestFail(t *testing.T) {
-	fakeID := 999
-	fakeGitLabToken := "fake-gitlab-token"
-	fakeGitLabDomain := "fake"
-	fakeGitLabAPI := fmt.Sprintf("https://%v/api/v4", fakeGitLabDomain)
-	var mapNil map[string]string
-	params := map[string]string{
-		"private_token": fakeGitLabToken,
-	}
-	mockedErr := errors.New("fake-error")
+func TestGetTagListWithFiveTags(t *testing.T) {
+	// arrange
+	stubByte, expected := getTagListResponse(5)
+	stubClient := getGetClientWithResponse(stubByte, http.StatusOK, "")
+	g := getGitLab(stubClient)
 
-	mockedClient := &mocks.Client{}
-	mockedClient.On("Get", fakeGitLabAPI+fmt.Sprintf("/projects/%v/repository/tags", fakeID), mapNil, params, mapNil).Return(nil, mockedErr)
+	// act
+	actual, _ := g.GetTagList(1)
 
-	g := &gitlab{
-		client:       mockedClient,
-		GitLabDomain: fakeGitLabDomain,
-		GitLabAPI:    fakeGitLabAPI,
-		GitLabToken:  fakeGitLabToken,
-	}
-
-	tags, err := g.GetTagList(fakeID)
-
-	assert := assert.New(t)
-	mockedClient.AssertNumberOfCalls(t, "Get", 1)
-	assert.Equal(err.Error(), "fake-error", "error messages should be equal")
-	assert.Nil(tags)
+	// assert
+	assert.Equal(t, 5, len(actual), "Number of tags should be equal")
+	assert.ElementsMatch(t, expected, actual, "Tags' content should be equal")
 }
 
-func TestGetTagListGitLabError(t *testing.T) {
-	fakeID := 999
-	fakeGitLabToken := "fake-gitlab-token"
-	fakeGitLabDomain := "fake"
-	fakeGitLabAPI := fmt.Sprintf("https://%v/api/v4", fakeGitLabDomain)
-	var mapNil map[string]string
-	params := map[string]string{
-		"private_token": fakeGitLabToken,
-	}
-	mockedRes := &http.Response{
-		StatusCode: 304,
-		Body:       ioutil.NopCloser(bytes.NewReader([]byte("fake-gitlab-error"))),
-		Header:     map[string][]string{"X-Next-Page": []string{""}},
-	}
+func TestGetTagListRequestError(t *testing.T) {
+	// arrange
+	stubClient := getGetClientWithError("fake-error")
+	g := getGitLab(stubClient)
 
-	mockedClient := &mocks.Client{}
-	mockedClient.On("Get", fakeGitLabAPI+fmt.Sprintf("/projects/%v/repository/tags", fakeID), mapNil, params, mapNil).Return(mockedRes, nil)
+	// act
+	_, err := g.GetTagList(1)
 
-	g := &gitlab{
-		client:       mockedClient,
-		GitLabDomain: fakeGitLabDomain,
-		GitLabAPI:    fakeGitLabAPI,
-		GitLabToken:  fakeGitLabToken,
-	}
+	// assert
+	assert.NotNil(t, err, "Error should not be nil")
+	assert.Equal(t, "fake-error", err.Error(), "Error message should be equal")
+}
 
-	tags, err := g.GetTagList(fakeID)
+func TestGetTagListInvalidGitLabAPI(t *testing.T) {
+	// arrange
+	stubClient := getGetClientWithResponse([]byte(`fake-body`), http.StatusNotFound, "")
+	g := getGitLab(stubClient)
 
-	assert := assert.New(t)
-	mockedClient.AssertNumberOfCalls(t, "Get", 1)
-	assert.Equal(err.Error(), "GitLab error: fake-gitlab-error", "error messages should be equal")
-	assert.Nil(tags)
+	// act
+	_, err := g.GetTagList(1)
+
+	// assert
+	assert.NotNil(t, err, "Error should not be nil")
+	assert.Equal(t, "Invalid GitLab API error: fake-body", err.Error(), "Error message should be equal")
 }

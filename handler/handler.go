@@ -6,12 +6,13 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/gin-gonic/gin"
-	"github.com/urfave/cli"
 	"gitlack/handler/webhook"
 	"gitlack/resource/gitlab"
 	"gitlack/resource/slack"
 	"gitlack/store"
+
+	"github.com/gin-gonic/gin"
+	"github.com/urfave/cli"
 )
 
 // Handler defines the interface that Gitlack needs to expose to outside

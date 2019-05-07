@@ -1,216 +1,141 @@
 package slack
 
 import (
-	"bytes"
 	"encoding/json"
-	"gitlack/resource/mocks"
-	"io/ioutil"
+	"gitlack/model"
 	"net/http"
 	"testing"
-	"text/template"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var slackResponseTemplate = `
-{
-    "ok": {{.OK}},
-    "channel": "{{.Channel}}",
-    "ts": "{{.TS}}"
+func TestPostSlackMessageWithOnlyChannelAndText(t *testing.T) {
+	// arrange
+	channel := "fake-channel"
+	text := "fake-text"
+	expected := getRequestBody()
+	expected["channel"] = channel
+	expected["text"] = text
+	stubClient := getPostClientWithRequestBody(getOKResponse(), http.StatusOK, expected)
+	s := getSlack(stubClient)
+
+	// assert
+	stubClient.On(
+		"Post",
+		"/chat.postMessage",
+		getURLEncodedHeader(),
+		mapNil,
+		expected).Return(nil, nil)
+
+	// act
+	s.PostSlackMessage(channel, text, nil, nil)
 }
-`
 
-var fakeFailSlackResponse = []byte(`
-{
-    "ok": false,
-    "error": "not_authed"
-}
-`)
-
-func renderTemplate(tpl string, data interface{}) *bytes.Buffer {
-	t := template.Must(template.New("tpl").Parse(tpl))
-	rendered := &bytes.Buffer{}
-	t.Execute(rendered, data)
-	return rendered
-}
-
-func TestPostSlackMessage(t *testing.T) {
-	fakeSlackAPI := "https://fake.slack.com/api"
-	fakeSlackToken := "fake-slack-token"
-	fakeURL := fakeSlackAPI + "/chat.postMessage"
-	fakeHeader := map[string]string{
-		"Content-Type": "application/x-www-form-urlencoded",
+func TestPostSlackMessageWithAuthor(t *testing.T) {
+	// arrange
+	author := &model.User{
+		Name:      "fake-name",
+		AvatarURL: "fake-icon-url",
 	}
-	fakeChannel := "fake-channel"
-	fakeText := "fake-text"
-	fakeReqBody := map[string]string{
-		"token":   fakeSlackToken,
-		"channel": fakeChannel,
-		"text":    fakeText,
-	}
-	expectedRes := map[string]interface{}{
-		"OK":      "true",
-		"Channel": fakeReqBody["channel"],
-		"TS":      "1234567890.123456",
-	}
-	slackRes := renderTemplate(slackResponseTemplate, expectedRes)
-	mockedRes := &http.Response{
-		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewReader(slackRes.Bytes())),
-	}
-	mockedClient := &mocks.Client{}
-	var mapNil map[string]string
-	mockedClient.On("Post", fakeURL, fakeHeader, mapNil, fakeReqBody).Return(mockedRes, nil)
+	expected := getRequestBody()
+	expected["username"] = "fake-name (Gitlack)"
+	expected["icon_url"] = "fake-icon-url"
+	stubClient := getPostClientWithRequestBody(getOKResponse(), http.StatusOK, expected)
+	s := getSlack(stubClient)
 
-	s := &slack{
-		client:     mockedClient,
-		SlackAPI:   fakeSlackAPI,
-		SlackToken: fakeSlackToken,
-	}
+	// assert
+	stubClient.On(
+		"Post",
+		"/chat.postMessage",
+		getURLEncodedHeader(),
+		mapNil,
+		expected).Return(nil, nil)
 
-	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil, nil)
-
-	assert := assert.New(t)
-	mockedClient.AssertNumberOfCalls(t, "Post", 1)
-	assert.Nil(err)
-	assert.True(smr.OK)
-	assert.Equal(expectedRes["Channel"].(string), smr.Channel, "channel should be equal")
-	assert.Equal(expectedRes["TS"].(string), smr.TS, "timestamp should be equal")
+	// act
+	s.PostSlackMessage("", "", author, nil)
 }
 
 func TestPostSlackMessageWithAttachment(t *testing.T) {
-	fakeSlackAPI := "https://fake.slack.com/api"
-	fakeSlackToken := "fake-slack-token"
-	fakeURL := fakeSlackAPI + "/chat.postMessage"
-	fakeHeader := map[string]string{
-		"Content-Type": "application/x-www-form-urlencoded",
-	}
-	fakeChannel := "fake-channel"
-	fakeText := "fake-text"
-	fakeAtm := &Attachment{
-		Color: AttachmentColor,
+	// arrange
+	atm := &Attachment{
+		Color: "fake-color",
 		Title: "fake-title",
-		Text:  fakeText,
+		Text:  "fake-text",
 	}
-	serAtm, _ := json.Marshal([]*Attachment{fakeAtm})
-	fakeReqBody := map[string]string{
-		"token":       fakeSlackToken,
-		"channel":     fakeChannel,
-		"text":        fakeText,
-		"attachments": string(serAtm),
-	}
+	marshaledAtm, _ := json.Marshal([]*Attachment{atm})
 
-	expectedRes := map[string]interface{}{
-		"OK":      "true",
-		"Channel": fakeReqBody["channel"],
-		"TS":      "1234567890.123456",
-	}
-	slackRes := renderTemplate(slackResponseTemplate, expectedRes)
-	mockedRes := &http.Response{
-		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewReader(slackRes.Bytes())),
-	}
-	mockedClient := &mocks.Client{}
-	var mapNil map[string]string
-	mockedClient.On("Post", fakeURL, fakeHeader, mapNil, fakeReqBody).Return(mockedRes, nil)
+	expected := getRequestBody()
+	expected["attachments"] = string(marshaledAtm)
+	stubClient := getPostClientWithRequestBody(getOKResponse(), http.StatusOK, expected)
+	s := getSlack(stubClient)
 
-	s := &slack{
-		client:     mockedClient,
-		SlackAPI:   fakeSlackAPI,
-		SlackToken: fakeSlackToken,
-	}
+	// assert
+	stubClient.On(
+		"Post",
+		"/chat.postMessage",
+		getURLEncodedHeader(),
+		mapNil,
+		expected).Return(nil, nil)
 
-	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil, fakeAtm)
-
-	assert := assert.New(t)
-	mockedClient.AssertNumberOfCalls(t, "Post", 1)
-	assert.Nil(err)
-	assert.True(smr.OK)
-	assert.Equal(fakeChannel, smr.Channel, "channel should be equal")
-	assert.Equal("1234567890.123456", smr.TS, "timestamp should be equal")
+	// act
+	s.PostSlackMessage("", "", nil, atm)
 }
 
 func TestPostSlackMessageWithThread(t *testing.T) {
-	fakeSlackAPI := "https://fake.slack.com/api"
-	fakeSlackToken := "fake-slack-token"
-	fakeURL := fakeSlackAPI + "/chat.postMessage"
-	fakeHeader := map[string]string{
-		"Content-Type": "application/x-www-form-urlencoded",
-	}
-	fakeChannel := "fake-channel"
-	fakeText := "fake-text"
-	fakeThreadTS := "9876543210.654321"
-	fakeReqBody := map[string]string{
-		"token":     fakeSlackToken,
-		"channel":   fakeChannel,
-		"text":      fakeText,
-		"thread_ts": fakeThreadTS,
-	}
-	expectedRes := map[string]interface{}{
-		"OK":      "true",
-		"Channel": fakeReqBody["channel"],
-		"TS":      "1234567890.123456",
-	}
-	slackRes := renderTemplate(slackResponseTemplate, expectedRes)
-	mockedRes := &http.Response{
-		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewReader(slackRes.Bytes())),
-	}
-	mockedClient := &mocks.Client{}
-	var mapNil map[string]string
-	mockedClient.On("Post", fakeURL, fakeHeader, mapNil, fakeReqBody).Return(mockedRes, nil)
+	// arrange
+	threadTS := "fake-thread-ts"
+	expected := getRequestBody()
+	expected["thread_ts"] = threadTS
+	stubClient := getPostClientWithRequestBody(getOKResponse(), http.StatusOK, expected)
+	s := getSlack(stubClient)
 
-	s := &slack{
-		client:     mockedClient,
-		SlackAPI:   fakeSlackAPI,
-		SlackToken: fakeSlackToken,
-	}
+	// assert
+	stubClient.On(
+		"Post",
+		"/chat.postMessage",
+		getURLEncodedHeader(),
+		mapNil,
+		expected).Return(nil, nil)
 
-	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil, nil, fakeThreadTS)
-
-	assert := assert.New(t)
-	mockedClient.AssertNumberOfCalls(t, "Post", 1)
-	assert.Nil(err)
-	assert.True(smr.OK)
-	assert.Equal(fakeChannel, smr.Channel, "channel should be equal")
-	assert.Equal("1234567890.123456", smr.TS, "timestamp should be equal")
+	// act
+	s.PostSlackMessage("", "", nil, nil, threadTS)
 }
 
-func TestPostSlackMessageFail(t *testing.T) {
-	fakeSlackAPI := "https://fake.slack.com/api"
-	fakeSlackToken := "fake-slack-token"
-	fakeURL := fakeSlackAPI + "/chat.postMessage"
-	fakeHeader := map[string]string{
-		"Content-Type": "application/x-www-form-urlencoded",
-	}
-	fakeChannel := "fake-channel"
-	fakeText := "fake-text"
-	fakeThreadTS := "9876543210.654321"
-	fakeReqBody := map[string]string{
-		"token":     fakeSlackToken,
-		"channel":   fakeChannel,
-		"text":      fakeText,
-		"thread_ts": fakeThreadTS,
-	}
+func TestPostSlackMessageRequestError(t *testing.T) {
+	// arrange
+	stubClient := getPostClientWithError("fake-error")
+	s := getSlack(stubClient)
 
-	mockedRes := &http.Response{
-		StatusCode: 200,
-		Body:       ioutil.NopCloser(bytes.NewReader(fakeFailSlackResponse)),
-	}
-	mockedClient := &mocks.Client{}
-	var mapNil map[string]string
-	mockedClient.On("Post", fakeURL, fakeHeader, mapNil, fakeReqBody).Return(mockedRes, nil)
+	// act
+	_, err := s.PostSlackMessage("", "", nil, nil)
 
-	s := &slack{
-		client:     mockedClient,
-		SlackAPI:   fakeSlackAPI,
-		SlackToken: fakeSlackToken,
-	}
+	// assert
+	assert.NotNil(t, err, "Error should not be nil")
+	assert.Equal(t, "fake-error", err.Error(), "Error message should be equal")
+}
 
-	smr, err := s.PostSlackMessage(fakeChannel, fakeText, nil, nil, fakeThreadTS)
+func TestPostSlackMessageResponseError(t *testing.T) {
+	// arrange
+	stubClient := getPostClientWithResponse([]byte(`fake-body`), http.StatusNotFound)
+	s := getSlack(stubClient)
 
-	assert := assert.New(t)
-	mockedClient.AssertNumberOfCalls(t, "Post", 1)
-	assert.Nil(smr)
-	assert.Equal("Invalid Slack API: not_authed", err.Error(), "error message should be equal")
+	// act
+	_, err := s.PostSlackMessage("", "", nil, nil)
+
+	// assert
+	assert.NotNil(t, err, "Error should not be nil")
+	assert.Equal(t, "HTTP response error: fake-body", err.Error(), "Error message should be equal")
+}
+
+func TestPostSlackMessageInvalidSlackAPI(t *testing.T) {
+	// arrange
+	stubClient := getPostClientWithResponse(getErrorResponse(), http.StatusOK)
+	s := getSlack(stubClient)
+
+	// act
+	_, err := s.PostSlackMessage("", "", nil, nil)
+
+	// assert
+	assert.NotNil(t, err, "err should not be nil")
+	assert.Equal(t, "Invalid Slack API: fake-error", err.Error(), "err should be fake-error")
 }
