@@ -1,5 +1,5 @@
-[![pipeline status](https://gitlab.com/chihkaiyu/gitlack/badges/master/pipeline.svg)](https://gitlab.com/chihkaiyu/gitlack/commits/master)
-[![coverage report](https://gitlab.com/chihkaiyu/gitlack/badges/master/coverage.svg)](https://gitlab.com/chihkaiyu/gitlack/commits/master)
+[![pipeline status](https://gitlab.com/chihkaiyu/gitlack-api/badges/master/pipeline.svg)](https://gitlab.com/chihkaiyu/gitlack-api/commits/master)
+[![coverage report](https://gitlab.com/chihkaiyu/gitlack-api/badges/master/coverage.svg)](https://gitlab.com/chihkaiyu/gitlack-api/commits/master)
 # Gitlack
 :palm_tree: Gitlack will post the message on Slack and tag related people.  
 Why reinvent the wheel since GitLab has built in [Slack notifications](https://docs.gitlab.com/ce/user/project/integrations/slack.html)?  
