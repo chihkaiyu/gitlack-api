@@ -19,6 +19,7 @@ type User struct {
 
 // MergeRequest is the model of GitLab merge request
 type MergeRequest struct {
+	id              int    `db:"id"`
 	ProjectID       int    `db:"project_id"`
 	MergeRequestNum int    `db:"mr_num"`
 	ThreadTS        string `db:"thread_ts"`
@@ -27,6 +28,7 @@ type MergeRequest struct {
 
 // Issue is the model of GitLab issue
 type Issue struct {
+	id        int    `db:"id"`
 	ProjectID int    `db:"project_id"`
 	IssueNum  int    `db:"issue_num"`
 	ThreadTS  string `db:"thread_ts"`
