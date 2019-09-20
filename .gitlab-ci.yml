@@ -16,6 +16,7 @@ unittest:
   script:
     - mkdir -p .cache
     - export GOPATH="$CI_PROJECT_DIR/.cache"
+    - export GOPROXY="https://proxy.golang.org"
     - go vet ./...
     # don't check mocks folder
     - go test -coverprofile=coverage.out $(go list ./... | grep -v /mocks)
