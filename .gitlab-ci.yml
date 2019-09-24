@@ -4,7 +4,7 @@ stages:
 
 unittest:
   stage: test
-  image: golang:1.11.3-stretch
+  image: golang:1.13.0-stretch
   only:
     - branches
     - tags
